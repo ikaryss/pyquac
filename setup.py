@@ -8,7 +8,7 @@ with open('HISTORY.md') as history_file:
 
 setup_args = dict(
     name='pyquac',
-    version='0.0.6',
+    version='0.0.7',
     description='Useful tools for quantum computing experiments, provided for BMSTU FMN',
     long_description_content_type="text/markdown",
     long_description=README + '\n\n' + HISTORY,
@@ -37,6 +37,7 @@ install_requires = [
     'ipywidgets~=7.6.3',
     'cufflinks~=0.17.3',
     'plotly~=4.14.3',
+    'dash~=1.21.0 '
 ]
 
 if __name__ == '__main__':

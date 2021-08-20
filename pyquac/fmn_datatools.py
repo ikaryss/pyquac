@@ -1,12 +1,15 @@
 # built-in libraries
 from time import perf_counter
 from typing import Iterable
-from IPython.display import display
 
 # installable libraries
 import pandas as pd
 import numpy as np
-from ipywidgets import IntProgress  # conda install -c conda-forge ipywidgets | pip install ipywidgets
+
+#fmn libraries
+import visa
+from drivers.N5183B import *
+from drivers.zva24_demo import *
 
 
 class timer:
@@ -59,17 +62,18 @@ class TwoToneSpectroscopy:
         self.__y_raw = []
         self.__heat_raw = []
 
-        self.i = 0
+        self.cs = visa.ResourceManager().open_resource(resource_name='GPIB0::12::INSTR')
+        self.LO = N5183B('N5183B', 'TCPIP0::192.168.180.143::hislip0::INSTR')
+        self.LO_resp = Znb("ZVA24")
 
         # self.__iteration_count = len(self.x_list) * len(self.y_list)
 
-    def get_response(self, *, x_key: Iterable = None, y_key: Iterable = None, sleep: float = 344, progress_bar: bool = False):
+    def get_response(self, *, x_key: Iterable = None, y_key: Iterable = None, sleep: float = 344):
         """
         generator for pandas object
         :param x_key: (optional) array like object
         :param y_key: (optional) array like object
         :param sleep: time sleep parameter (Hz). Default = 344.
-        :param progress_bar: (optional) (bool) if True then shows progress bar of loop
         :return: None
         """
 
@@ -78,34 +82,33 @@ class TwoToneSpectroscopy:
 
         try:
 
-            if not progress_bar:
-                pass
-            else:
-                f = IntProgress(min=0, max=len(currents) * len(freqs))
-                display(f)
-
             while self.__x_ind != len(currents):
 
-                self.__x_raw.append(currents[self.__x_ind])
-                self.__y_raw.append(freqs[self.__y_ind])
-                self.__heat_raw.append(np.random.random())
+                self.cs.write("CURRent " + str(currents[self.__x_ind]))  # Current write
+                self.LO.set_frequency(freqs[self.__y_ind])  # Frequency write
+
+                self.__x_raw.append(float(self.cs.query("CURRent?")))  # Current read
+                self.__y_raw.append(float(self.LO.get_frequency()))  # Frequency read
+                self.__heat_raw.append(float(self.__heating_data()))  # Response read
 
                 if self.__y_ind + 1 == len(freqs):
                     self.__x_ind += 1  # go to the next current
                     self.__y_ind = 0  # go to the next round of frequencies
 
-                    if not progress_bar:
-                        pass
-                    else:
-                        f.value = self.i
-
                 else:
                     self.__y_ind += 1
 
-                self.i += 1
                 timer.sleep(sleep)
 
         except KeyboardInterrupt:
+            if len(self.__x_raw) == len(self.__y_raw) == len(self.__heat_raw):
+                pass
+            else:
+                max_l = max([len(self.__x_raw), len(self.__y_raw), len(self.__heat_raw)])
+                # if len(self.__x_raw) < max_l: self.__x_raw.append(np.nan)
+                self.__y_ind = self.__y_ind + 1 if self.__y_ind < len(freqs) else 0
+                if len(self.__y_raw) < max_l: self.__y_raw.append(freqs[self.__y_ind])
+                if len(self.__heat_raw) < max_l: self.__heat_raw.append(np.nan)
             pass
 
     @property
@@ -118,6 +121,7 @@ class TwoToneSpectroscopy:
         :param imshow: (optional) if True then result returns dataframe for matplotlib.pyplot.imshow()
         :return: Pandas Data Frame. column.names: ['currents', 'frequencies', 'response']
         """
+
         nx_steps = len(self.x_list)
         ny_steps = len(self.y_list)
 
@@ -196,3 +200,6 @@ class TwoToneSpectroscopy:
         array = np.asarray(self.y_list)
         idx = (np.abs(array - value)).argmin()
         return array[idx]
+
+    def __heating_data(self):
+        return 20 * np.log10(abs(self.LO_resp.get_sdata()))[0]
