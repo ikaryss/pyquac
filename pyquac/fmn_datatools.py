@@ -6,7 +6,7 @@ from typing import Iterable
 import pandas as pd
 import numpy as np
 
-#fmn libraries
+# fmn libraries
 import visa
 from drivers.N5183B import *
 from drivers.zva24_demo import *
@@ -55,9 +55,6 @@ class TwoToneSpectroscopy:
         self.y_list = np.arange(self.y_min, self.y_max,
                                 self.y_step)
 
-        self.__x_ind = 0
-        self.__y_ind = 0
-
         self.__x_raw = []
         self.__y_raw = []
         self.__heat_raw = []
@@ -68,7 +65,7 @@ class TwoToneSpectroscopy:
 
         # self.__iteration_count = len(self.x_list) * len(self.y_list)
 
-    def get_response(self, *, x_key: Iterable = None, y_key: Iterable = None, sleep: float = 344):
+    def get_response(self, *, x_key: Iterable = None, y_key: Iterable = None, sleep: float = 0.05):
         """
         generator for pandas object
         :param x_key: (optional) array like object
@@ -77,27 +74,57 @@ class TwoToneSpectroscopy:
         :return: None
         """
 
-        currents = np.array(x_key) if x_key is not None else self.x_list
-        freqs = np.array(y_key) if y_key is not None else self.y_list
+        x = x_key if x_key is not None else self.x_list
+
+        """config frequencies"""
+        if y_key is not None:
+            if np.array(y_key).ndim == 1:
+                y_key = np.tile(y_key, [len(x), 1])
+            elif np.array(y_key).ndim > 1 and x_key is not None:
+                ind_list = []
+                for x_k in x_key:
+                    ind_list.append(list(self.x_list).index(x_k))
+                y_key = y_key[ind_list]
+
+            else:
+                pass
+
+            freqs = y_key.ravel()
+
+        else:
+            freqs = np.tile(self.y_list, len(x))
+            pass
+
+        """config currents"""
+        if y_key is not None:
+            current_encapsulated = []
+            for i, y_i in enumerate(y_key):
+                current_encapsulated.append([x[i], ] * len(y_i))
+            currents = np.array(current_encapsulated).ravel()
+        else:
+            currents = np.repeat(x, len(self.y_list))
+
+        temp_df = pd.DataFrame({'x_value': currents, 'y_value': freqs})
+
+        index1 = pd.MultiIndex.from_arrays([temp_df[col] for col in ['x_value', 'y_value']])
+        index2 = pd.MultiIndex.from_arrays([self.raw_frame[col] for col in ['x_value', 'y_value']])
+        temp_df = temp_df.loc[~index1.isin(index2)]
+
+        currents = temp_df['x_value'].values
+        freqs = temp_df['y_value'].values
 
         try:
+            i = 0
 
-            while self.__x_ind != len(currents):
-
-                self.cs.write("CURRent " + str(currents[self.__x_ind]))  # Current write
-                self.LO.set_frequency(freqs[self.__y_ind])  # Frequency write
+            for _ in range(len(currents)):
+                self.cs.write("CURRent " + str(currents[i]))  # Current write
+                self.LO.set_frequency(freqs[i])  # Frequency write
 
                 self.__x_raw.append(float(self.cs.query("CURRent?")))  # Current read
                 self.__y_raw.append(float(self.LO.get_frequency()))  # Frequency read
                 self.__heat_raw.append(float(self.__heating_data()))  # Response read
 
-                if self.__y_ind + 1 == len(freqs):
-                    self.__x_ind += 1  # go to the next current
-                    self.__y_ind = 0  # go to the next round of frequencies
-
-                else:
-                    self.__y_ind += 1
-
+                i += 1
                 timer.sleep(sleep)
 
         except KeyboardInterrupt:
@@ -106,8 +133,8 @@ class TwoToneSpectroscopy:
             else:
                 max_l = max([len(self.__x_raw), len(self.__y_raw), len(self.__heat_raw)])
                 # if len(self.__x_raw) < max_l: self.__x_raw.append(np.nan)
-                self.__y_ind = self.__y_ind + 1 if self.__y_ind < len(freqs) else 0
-                if len(self.__y_raw) < max_l: self.__y_raw.append(freqs[self.__y_ind])
+                i = i + 1 if i < len(freqs) else i
+                if len(self.__y_raw) < max_l: self.__y_raw.append(freqs[i])
                 if len(self.__heat_raw) < max_l: self.__heat_raw.append(np.nan)
             pass
 
@@ -142,11 +169,11 @@ class TwoToneSpectroscopy:
         if not imshow:
             df = pd.DataFrame({'currents': x_1d, 'frequencies': y_1d, 'response': heat_1d})
         else:
-            df = pd.DataFrame(data=heat_list.T, columns=self.x_list, index=self.y_list)
+            df = pd.DataFrame(data=heat_list.T[::-1], columns=self.x_list, index=self.y_list)
 
         return df
 
-    def get_approximation_result(self, resolving_zone: float = 0.1, *, imshow: bool = False, fillna: bool = False):
+    def approximate(self, resolving_zone: float = 0.1, *, imshow: bool = False, fillna: bool = False):
         """
         return resulting approximated Data Frame
         :param resolving_zone: [0:1) - resolving zone for plot
@@ -181,20 +208,27 @@ class TwoToneSpectroscopy:
                     get_result_df['frequencies'] == y_for_approximate[i])
             get_result_df.loc[get_result_mask, 'response'] = max_heat_sample
 
+        y_keys = []
+
         for xx in self.x_list:
             idx = get_result_df[get_result_df.currents == xx].loc[get_result_df.response == max_heat_sample].index[0]
             count_of_resolve_idx = len(self.y_list) * resolving_zone
             get_result_df.iloc[idx + 1:idx + int(count_of_resolve_idx / 2), 2] = max_heat_sample / 2
             get_result_df.iloc[idx - int(count_of_resolve_idx / 2):idx, 2] = max_heat_sample / 2
 
+            y_keys.append(
+                get_result_df.iloc[idx - int(count_of_resolve_idx / 2):idx + int(count_of_resolve_idx / 2), 1])
+
         if not imshow:
-            return get_result_df
+            return dict(result_df=get_result_df,
+                        y_key=np.array(y_keys))
         else:
             heat_list = []
             for xx in self.x_list:
                 heat_list.append(get_result_df[get_result_df.currents == xx].loc[:, 'response'].values)
-            df = pd.DataFrame(data=np.array(heat_list).T, columns=self.x_list, index=self.y_list)
-            return df
+            df = pd.DataFrame(data=np.array(heat_list).T[::-1], columns=self.x_list, index=self.y_list)
+            return dict(result_df=df,
+                        y_key=np.array(y_keys))
 
     def __find_nearest(self, value):
         array = np.asarray(self.y_list)
