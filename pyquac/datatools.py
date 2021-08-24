@@ -47,16 +47,28 @@ class TwoToneSpectroscopy:
         self.y_max = y_max
         self.y_step = y_step
 
-        self.x_list = np.arange(self.x_min, self.x_max,
+        self.x_list = np.arange(self.x_min, self.x_max + self.x_step,
                                 self.x_step)
-        self.y_list = np.arange(self.y_min, self.y_max,
+        self.y_list = np.arange(self.y_min, self.y_max + self.y_step,
                                 self.y_step)
 
         self.__x_raw = []
         self.__y_raw = []
         self.__heat_raw = []
 
-        self.i = 0
+        self.heat_container = np.zeros(len(self.x_list) * len(self.y_list))
+        self.heat_container[:] = np.nan
+
+        self.x_container = np.zeros(len(self.x_list) * len(self.y_list))
+        self.y_container = np.zeros(len(self.x_list) * len(self.y_list))
+
+        self.nx_steps = len(self.x_list)
+        self.ny_steps = len(self.y_list)
+
+        self.heat_list = np.empty((self.nx_steps, self.ny_steps))
+        self.heat_list[:] = np.nan
+
+        self.bar_indicator = 0
 
         # self.__iteration_count = len(self.x_list) * len(self.y_list)
 
@@ -116,7 +128,7 @@ class TwoToneSpectroscopy:
             if not progress_bar:
                 pass
             else:
-                f = IntProgress(min=0, max=len(currents) * len(freqs))
+                f = IntProgress(min=0, max=len(currents))
                 display(f)
 
             for _ in range(len(currents)):
@@ -124,15 +136,16 @@ class TwoToneSpectroscopy:
                 self.__x_raw.append(currents[i])
                 self.__y_raw.append(freqs[i])
                 self.__heat_raw.append(np.random.random())
-                i += 1
-                timer.sleep(sleep)
 
                 if not progress_bar:
                     pass
                 else:
-                    f.value = self.i
+                    f.value = self.bar_indicator
 
-                self.i += 1
+                self.bar_indicator += 1
+
+                i += 1
+                timer.sleep(sleep)
 
         except KeyboardInterrupt:
             pass
@@ -147,27 +160,23 @@ class TwoToneSpectroscopy:
         :param imshow: (optional) if True then result returns dataframe for matplotlib.pyplot.imshow()
         :return: Pandas Data Frame. column.names: ['currents', 'frequencies', 'response']
         """
-        nx_steps = len(self.x_list)
-        ny_steps = len(self.y_list)
 
-        x = np.array(self.__x_raw)
-        y = np.array(self.__y_raw)
-        heat = np.array(self.__heat_raw)
-
-        heat_list = np.empty((nx_steps, ny_steps))
-        heat_list[:] = np.nan
+        self.heat_container[:len(self.__heat_raw)] = self.__heat_raw
+        self.x_container[:len(self.__x_raw)] = self.__x_raw
+        self.y_container[:len(self.__y_raw)] = self.__y_raw
 
         for i in range(len(self.__x_raw)):
-            heat_list[int((x[i] - self.x_min) // self.x_step)][int((y[i] - self.y_min) // self.y_step)] = heat[i]
+            self.heat_list[int((self.x_container[i] - self.x_min) // self.x_step)][
+                int((self.y_container[i] - self.y_min) // self.y_step)] = self.heat_container[i]
 
         x_1d = np.repeat(self.x_list, len(self.y_list))
         y_1d = np.tile(self.y_list, len(self.x_list))
-        heat_1d = heat_list.ravel()
+        heat_1d = self.heat_list.ravel()
 
         if not imshow:
             df = pd.DataFrame({'currents': x_1d, 'frequencies': y_1d, 'response': heat_1d})
         else:
-            df = pd.DataFrame(data=heat_list.T[::-1], columns=self.x_list, index=self.y_list)
+            df = pd.DataFrame(data=self.heat_list.T[::-1], columns=self.x_list, index=self.y_list)
 
         return df
 
@@ -184,7 +193,7 @@ class TwoToneSpectroscopy:
 
         for xx in x_set:
             temp_max_row = tuple(
-                self.raw_frame.loc[self.raw_frame[self.raw_frame.x_value == xx].idxmax()['heat_value']])
+                self.raw_frame.loc[self.raw_frame[self.raw_frame.x_value == xx]['heat_value'].abs().idxmax()])
             tuple_list += (temp_max_row,)
 
         tuple_of_max_z_values = np.array(tuple_list).T
