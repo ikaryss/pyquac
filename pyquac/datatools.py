@@ -1,12 +1,14 @@
 # built-in libraries
 from time import perf_counter
 from typing import Iterable
-from IPython.display import display
+# from IPython.display import display
 
 # installable libraries
 import pandas as pd
 import numpy as np
-from ipywidgets import IntProgress  # conda install -c conda-forge ipywidgets | pip install ipywidgets
+
+
+# from ipywidgets import IntProgress  # conda install -c conda-forge ipywidgets | pip install ipywidgets
 
 
 class timer:
@@ -72,14 +74,12 @@ class TwoToneSpectroscopy:
 
         # self.__iteration_count = len(self.x_list) * len(self.y_list)
 
-    def get_response(self, *, x_key: Iterable = None, y_key: Iterable = None, sleep: float = 0.05,
-                     progress_bar: bool = False):
+    def get_response(self, *, x_key: Iterable = None, y_key: Iterable = None, sleep: float = 0.05):
         """
         generator for pandas object
         :param x_key: (optional) array like object
         :param y_key: (optional) array like object
         :param sleep: time sleep parameter (Hz). Default = 344.
-        :param progress_bar: (optional) (bool) if True then shows progress bar of loop
         :return: None
         """
 
@@ -125,24 +125,23 @@ class TwoToneSpectroscopy:
         try:
             i = 0
 
-            if not progress_bar:
-                pass
-            else:
-                f = IntProgress(min=0, max=len(currents))
-                display(f)
+            # if not progress_bar:
+            #     pass
+            # else:
+            #     f = IntProgress(min=0, max=len(currents))
+            #     display(f)
 
             for _ in range(len(currents)):
-
                 self.__x_raw.append(currents[i])
                 self.__y_raw.append(freqs[i])
                 self.__heat_raw.append(np.random.random())
 
-                if not progress_bar:
-                    pass
-                else:
-                    f.value = self.bar_indicator
-
-                self.bar_indicator += 1
+                # if not progress_bar:
+                #     pass
+                # else:
+                #     f.value = self.bar_indicator
+                #
+                # self.bar_indicator += 1
 
                 i += 1
                 timer.sleep(sleep)

@@ -8,7 +8,7 @@ with open('HISTORY.md') as history_file:
 
 setup_args = dict(
     name='pyquac',
-    version='0.0.9',
+    version='0.0.91',
     description='Useful tools for quantum computing experiments, provided for BMSTU FMN',
     long_description_content_type="text/markdown",
     long_description=README + '\n\n' + HISTORY,
@@ -31,14 +31,13 @@ setup_args = dict(
 )
 
 install_requires = [
-    'pandas~=1.3.1',
-    'numpy~=1.20.3',
-    'ipython~=7.26.0',
-    'ipywidgets~=7.6.3',
-    'cufflinks~=0.17.3',
-    'plotly~=4.14.3',
-    'dash~=1.21.0 ',
-    'jupyter_dash~=0.4.0'
+    'pandas',
+    'numpy',
+    'jupyter',
+    'ipywidgets',
+    'cufflinks',
+    'dash',
+    'jupyter_dash'
 ]
 
 if __name__ == '__main__':
