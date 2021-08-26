@@ -8,7 +8,7 @@ with open('HISTORY.md') as history_file:
 
 setup_args = dict(
     name='pyquac',
-    version='0.0.91',
+    version='0.0.92',
     description='Useful tools for quantum computing experiments, provided for BMSTU FMN',
     long_description_content_type="text/markdown",
     long_description=README + '\n\n' + HISTORY,

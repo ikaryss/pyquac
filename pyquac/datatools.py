@@ -226,14 +226,14 @@ class TwoToneSpectroscopy:
                 get_result_df.iloc[idx - int(count_of_resolve_idx / 2):idx + int(count_of_resolve_idx / 2), 1])
 
         if not imshow:
-            return dict(result_df=get_result_df,
+            return dict(mask=get_result_df,
                         y_key=np.array(y_keys))
         else:
             heat_list = []
             for xx in self.x_list:
                 heat_list.append(get_result_df[get_result_df.currents == xx].loc[:, 'response'].values)
             df = pd.DataFrame(data=np.array(heat_list).T[::-1], columns=self.x_list, index=self.y_list)
-            return dict(result_df=df,
+            return dict(mask=df,
                         y_key=np.array(y_keys))
 
     def __find_nearest(self, value):
