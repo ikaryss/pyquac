@@ -1,0 +1,9 @@
+name: pyquac
+
+channels:
+  - default
+  - conda-forge
+
+dependencies:
+  - python=3.9
+  - pip # pip must be mentioned explicitly, or conda-lock will fail
