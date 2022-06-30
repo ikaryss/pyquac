@@ -1,9 +1,8 @@
 # built-in libraries
 from time import perf_counter
-from typing import Iterable, Union
+from typing import Iterable, Union, Sized
 import time
 # installable libraries
-import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from scipy import stats
@@ -59,7 +58,7 @@ class SortingTools:
 class mrange:
 
     @classmethod
-    def cust_range(cls, *args, rtol=1e-05, atol=1e-08, include=[True, False]):
+    def cust_range(cls, *args, rtol=1e-05, atol=1e-08, include=(True, False)):
         """
         Combines numpy.arange and numpy.isclose to mimic
         open, half-open and closed intervals.
@@ -105,11 +104,11 @@ class mrange:
 
     @classmethod
     def crange(cls, *args, **kwargs):
-        return mrange.cust_range(*args, **kwargs, include=[True, True])
+        return mrange.cust_range(*args, **kwargs, include=(True, True))
 
     @classmethod
     def orange(cls, *args, **kwargs):
-        return mrange.cust_range(*args, **kwargs, include=[True, False])
+        return mrange.cust_range(*args, **kwargs, include=(True, False))
 
 
 class timer:
@@ -141,8 +140,8 @@ class Spectroscopy:
 
     def __init__(self, *,
                  x_min: float = None, x_max: float = None, y_min: float = None, y_max: float = None,
-                 x_step: float = None, y_step: float = None, nx_points: float = None, ny_points: float = None,
-                 x_arr: float = None, y_arr: float = None
+                 x_step: float = None, y_step: float = None, nx_points: int = None, ny_points: int = None,
+                 x_arr: Iterable = None, y_arr: Iterable = None
                  ):
         """
         Class provides methods for working with live data for heatmap measurements
@@ -481,14 +480,14 @@ class Spectroscopy:
             pass
 
     def xyz_peak(self, x_key: Iterable = None, thres: float = 0.7,
-                 min_dist: float = 75, n_last: int = 20):
+                 min_dist: int = 75, n_last: int = 20):
         """fit the heatmap curve by finding peak values
         :param x_key:
         :type x_key: Iterable
         :param thres:
         :type thres: float
         :param min_dist:
-        :type min_dist: float
+        :type min_dist: int
         :param n_last:
         :type n_last: int
         :return: x, y, z tuple of peak values
@@ -542,8 +541,8 @@ class Spectroscopy:
         return tuple_of_max_z_values
 
     def approximate(self, poly_nop: int = 1000, resolving_zone: float = 0.1, *,
-                    x_key: Iterable = None, thres: float = 0.7, min_dist: float = 75, n_last: int = 20,
-                    deg: int = 2):
+                    x_key: Iterable = None, thres: float = 0.7, min_dist: int = 75, n_last: int = 20,
+                    deg: int = 2, fillna: bool = False):
         """approximating measured data with polyline of chosen degree
         :param poly_nop: number of points in fitted curve
         :type poly_nop: int
@@ -554,11 +553,12 @@ class Spectroscopy:
         :param thres: [0:1] threshold of the normalized peak. default 0.7
         :type thres: float
         :param min_dist: minimum distant from one peak to another. default 75
-        :type min_dist: float
+        :type min_dist: int
         :param n_last: nop of max values
         :type n_last: int
         :param deg: Degree of the fitting polynomial
         :type deg: int
+        :param fillna: if heatmap nan values have to be filled with color
         :return: dict with keys x_key, y_key, mask, imshow_mask, poly_line, poly_coef
         """
         if x_key is not None:
