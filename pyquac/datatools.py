@@ -256,7 +256,7 @@ class Spectroscopy:
 
     def iter_setup(self, *, x_key: Union[float, int, Iterable] = None, y_key: Union[float, int, Iterable] = None,
                    x_min: float = None, x_max: float = None, y_min: float = None, y_max: float = None):
-        """measurement setup. if all optional params are None then setup self.load and self.frequency for measuring all
+        """Measurement setup. if all optional params are None then setup self.load and self.frequency for measuring all
         data
         :param x_key: x value(s) for measurement
         :type x_key: float | int | Iterable
@@ -355,8 +355,8 @@ class Spectroscopy:
         index2 = pd.MultiIndex.from_arrays([raw_frame_without_nans[col] for col in ['x_value', 'y_value']])
         temp_df = temp_df.loc[~index1.isin(index2)]
 
-        self.load = temp_df['x_value'].values
-        self.frequency = temp_df['y_value'].values
+        self.load = np.around(temp_df['x_value'].values, decimals=self.__x_step_DP)
+        self.frequency = np.around(temp_df['y_value'].values, decimals=self.__y_step_DP)
 
         pass
 
