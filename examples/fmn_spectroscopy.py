@@ -43,7 +43,7 @@ class Tts(TwoToneSpectroscopy):
                  nx_points=None, x_step=None,
                  y_step=None, ny_points=None,
                  x_arr=None, y_arr=None,
-                 hdawg_port: str = '127.0.0.1', hdawg_port1: int = 8004, hdawg_mode: int = 6,
+                 hdawg_host: str = '127.0.0.1', hdawg_port: int = 8004, hdawg_mode: int = 6,
                  hdawg_device: str = 'dev8210', hdawg_channel: int = 5,
                  LO_port: str = 'TCPIP0::192.168.180.143::hislip0::INSTR',
                  LO_res_port: str = 'TCPIP0::192.168.180.110::inst0::INSTR',
@@ -67,9 +67,9 @@ class Tts(TwoToneSpectroscopy):
         :param y_step: y step value (float)
         :param fr_min: min frequency for find resonator
         :param fr_max: max frequency for find resonator
-        :param hdawg_port: hdawg = zhinst.ziPython.ziDAQServer(hdawg_port, hdawg_port1, hdawg_mode)
-        :param hdawg_port1: hdawg = zhinst.ziPython.ziDAQServer(hdawg_port, hdawg_port1, hdawg_mode)
-        :param hdawg_mode: hdawg = zhinst.ziPython.ziDAQServer(hdawg_port, hdawg_port1, hdawg_mode)
+        :param hdawg_host: hdawg = zhinst.ziPython.ziDAQServer(hdawg_host, hdawg_port, hdawg_mode)
+        :param hdawg_port: hdawg = zhinst.ziPython.ziDAQServer(hdawg_host, hdawg_port, hdawg_mode)
+        :param hdawg_mode: hdawg = zhinst.ziPython.ziDAQServer(hdawg_host, hdawg_port, hdawg_mode)
         :param LO_port: qubit LO = N5183B('N5183B', LO_port)
         :param LO_res_port: resonator LO_res = Znb(LO_res_port)
         :param hdawg_device: 'dev8210' by default
@@ -96,7 +96,7 @@ class Tts(TwoToneSpectroscopy):
 
         # HDAWG or CS init
         if not self.cs_mode:
-            self.hdawg = zhinst.ziPython.ziDAQServer(hdawg_port, hdawg_port1, hdawg_mode)
+            self.hdawg = zhinst.ziPython.ziDAQServer(hdawg_host, hdawg_port, hdawg_mode)
             self.hdawg_setDouble = '/' + self.hdawg_device + '/sigouts/' + str(self.hdawg_channel) + '/offset'
             # open HDAWG ZI
             _ = self.hdawg.awgModule()
@@ -242,7 +242,7 @@ class Sts(TwoToneSpectroscopy):
                  x_min=None, x_max=None, y_min=None, y_max=None,
                  nx_points=None, x_step=None, y_step=None, ny_points=None,
                  x_arr=None, y_arr=None,
-                 hdawg_port: str = '127.0.0.1', hdawg_port1: int = 8004, hdawg_mode: int = 6,
+                 hdawg_host: str = '127.0.0.1', hdawg_port: int = 8004, hdawg_mode: int = 6,
                  hdawg_channel: int = 5, hdawg_device: str = 'dev8210',
                  LO_res_port: str = 'TCPIP0::192.168.180.110::inst0::INSTR',
                  LO_res_set_bandwidth: int = 20, LO_res_set_power: int = -10,
@@ -261,9 +261,9 @@ class Sts(TwoToneSpectroscopy):
         :param nx_points: x count value (int)
         :param y_step: y step value (float)
         :param ny_points: y count value (int)
-        :param hdawg_port: hdawg = zhinst.ziPython.ziDAQServer(hdawg_port, hdawg_port1, hdawg_mode)
-        :param hdawg_port1: hdawg = zhinst.ziPython.ziDAQServer(hdawg_port, hdawg_port1, hdawg_mode)
-        :param hdawg_mode: hdawg = zhinst.ziPython.ziDAQServer(hdawg_port, hdawg_port1, hdawg_mode)
+        :param hdawg_host: hdawg = zhinst.ziPython.ziDAQServer(hdawg_host, hdawg_port, hdawg_mode)
+        :param hdawg_port: hdawg = zhinst.ziPython.ziDAQServer(hdawg_host, hdawg_port, hdawg_mode)
+        :param hdawg_mode: hdawg = zhinst.ziPython.ziDAQServer(hdawg_host, hdawg_port, hdawg_mode)
         :param LO_res_port: resonator LO_res = Znb(LO_res_port)
         :param hdawg_channel: hdawg.setInt('/' + hdawg_device + '/sigouts/' + str(hdawg_channel) + '/on', 1)
         :param hdawg_device: 'dev8210' by default
@@ -286,7 +286,7 @@ class Sts(TwoToneSpectroscopy):
 
         # HDAWG or CS init
         if not self.cs_mode:
-            self.hdawg = zhinst.ziPython.ziDAQServer(hdawg_port, hdawg_port1, hdawg_mode)
+            self.hdawg = zhinst.ziPython.ziDAQServer(hdawg_host, hdawg_port, hdawg_mode)
             self.hdawg_setDouble = '/' + self.hdawg_device + '/sigouts/' + str(self.hdawg_channel) + '/offset'
             _ = self.hdawg.awgModule()
         else:
@@ -399,7 +399,7 @@ class Sts2Q(TwoToneSpectroscopy):
         :param x_max: max x value of target qubit or base x_max while checking
         :param y_min: min y value of readout qubit
         :param y_max: max y value of readout qubit
-        :param nx_points: nx_points value of target qubit or base nx_points while checking
+        :param nx_points: nx_points value of target qubit or base hdawg_port nx_points while checking
         :param x_step: x_step value of target qubit or base x_step while checking
         :param y_step: y_step value of readout qubit
         :param ny_points: ny_points value of readout qubit
@@ -414,9 +414,9 @@ class Sts2Q(TwoToneSpectroscopy):
         :param Q1_ch: target channel
         :param Q2_ch: control channel
         :param Coupler_ch: coupler channel
-        :param hdawg_port: hdawg = zhinst.ziPython.ziDAQServer(hdawg_port, hdawg_port1, hdawg_mode)
-        :param hdawg_port1: hdawg = zhinst.ziPython.ziDAQServer(hdawg_port, hdawg_port1, hdawg_mode)
-        :param hdawg_mode: hdawg = zhinst.ziPython.ziDAQServer(hdawg_port, hdawg_port1, hdawg_mode)
+        :param hdawg_host: hdawg = zhinst.ziPython.ziDAQServer(hdawg_host, hdawg_port, hdawg_mode)
+        :param hdawg_port: hdawg = zhinst.ziPython.ziDAQServer(hdawg_host, hdawg_port, hdawg_mode)
+        :param hdawg_mode: hdawg = zhinst.ziPython.ziDAQServer(hdawg_host, hdawg_port, hdawg_mode)
         :param LO_res_port: resonator LO_res = Znb(LO_res_port)
         :param hdawg_channel: hdawg.setInt('/' + hdawg_device + '/sigouts/' + str(hdawg_channel) + '/on', 1)
         :param hdawg_device: 'dev8210' by default
@@ -929,9 +929,9 @@ class Tts2Q(TwoToneSpectroscopy):
         :param y_step: y step value (float)
         :param fr_min: min frequency for find resonator
         :param fr_max: max frequency for find resonator
-        :param hdawg_port: hdawg = zhinst.ziPython.ziDAQServer(hdawg_port, hdawg_port1, hdawg_mode)
-        :param hdawg_port1: hdawg = zhinst.ziPython.ziDAQServer(hdawg_port, hdawg_port1, hdawg_mode)
-        :param hdawg_mode: hdawg = zhinst.ziPython.ziDAQServer(hdawg_port, hdawg_port1, hdawg_mode)
+        :param hdawg_host: hdawg = zhinst.ziPython.ziDAQServer(hdawg_host, hdawg_port, hdawg_mode)
+        :param hdawg_port: hdawg = zhinst.ziPython.ziDAQServer(hdawg_host, hdawg_port, hdawg_mode)
+        :param hdawg_mode: hdawg = zhinst.ziPython.ziDAQServer(hdawg_host, hdawg_port, hdawg_mode)
         :param LO_port: qubit LO = N5183B('N5183B', LO_port)
         :param LO_res_port: resonator LO_res = Znb(LO_res_port)
         :param hdawg_device: 'dev8210' by default
