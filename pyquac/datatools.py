@@ -273,13 +273,13 @@ class Spectroscopy:
         :return:
         """
         if x_key is not None:
-            x_key = self.__config_closest_values(x_key, self.x_list)
+            x_key = np.unique(self.__config_closest_values(x_key, self.x_list))
 
         if y_key is not None:
             if np.array(y_key).dtype == object:
                 pass
             else:
-                y_key = self.__config_closest_values(y_key, self.y_list)
+                y_key = np.unique(self.__config_closest_values(y_key, self.y_list))
 
         "set x_min x_max arrays"
         if (y_min is not None) | (y_max is not None) | (x_min is not None) | (x_max is not None):
