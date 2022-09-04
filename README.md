@@ -15,3 +15,5 @@ pip install pyquac
 ```
 git clone https://github.com/ikaryss/pyquac.git
 ```
+
+![Tests](https://github.com/mCodingLLC/SlapThatLikeButton-TestingStarterProject/actions/workflows/tests.yml/badge.svg)
