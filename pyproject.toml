@@ -38,3 +38,6 @@ addopts = "-rsxX -l --tb=short"
 testpaths = [
     "tests"
 ]
+
+[tool.mypy]
+ignore_missing_imports = true
