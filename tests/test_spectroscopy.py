@@ -206,7 +206,6 @@ def test_iter_setup(x_key, y_key, x_min, x_max, y_min, y_max):
 
     # Y mask set
     if y_key is not None:
-        print('Y_KEEEEEEY', y_key)
         y_key = data._Spectroscopy__config_closest_values(y_key, data.y_list)
 
         msk = np.isin(data.y_1d, y_key)
