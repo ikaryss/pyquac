@@ -1,5 +1,5 @@
 # pyquac  
-![Tests](https://github.com/mCodingLLC/SlapThatLikeButton-TestingStarterProject/actions/workflows/tests.yml/badge.svg)
+![Tests](https://github.com/mCodingLLC/SlapThatLikeButton-TestingStarterProject/actions/workflows/tests.yml/badge.svg)  
 Useful tools for quantum computing experiments in **Jupyter notebook**, provided for BMSTU FMN  
 # Description  
 package consists of two main modules:  
