@@ -385,6 +385,13 @@ class Spectroscopy:
                 self.y_raw.append(self.frequency[i])
             if len(self.z_raw) < max_l:
                 self.z_raw.append(np.nan)
+    
+    def iterator(self, maintask, subtask, *args, **kwargs):
+        def wrapper():
+            # smth to do before main task
+            for i in range(self.load):
+                result = maintask()
+            # smth to do after main task
 
     @property
     def raw_frame(self):
