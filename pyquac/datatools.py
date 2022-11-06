@@ -436,6 +436,27 @@ class Spectroscopy:
             df = pd.DataFrame(data=self.__z_2d, columns=self.x_list, index=self.y_list)
 
         return df
+    
+    def get_raw_result(self):
+        """
+        generates raw Data Frame with columns [x_value, y_value, response]
+        :return: Pandas Data Frame
+        """
+        x = []
+        y = []
+        heat = []
+
+        uniq_x = np.unique(self.raw_frame.x_value.values)
+
+        for xx in uniq_x:
+            y_arr = self.raw_frame[self.raw_frame.x_value == xx].y_value.values
+            heat_arr = self.raw_frame[self.raw_frame.x_value == xx].heat_value.values
+
+            x.append(xx)
+            y.append(y_arr)
+            heat.append(heat_arr)
+
+        return pd.DataFrame({'x_value': x, 'y_value': y, 'response': heat})
 
     @property
     def non_njit_result(self):
