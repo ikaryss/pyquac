@@ -249,7 +249,7 @@ class Spectroscopy:
         print('Base spectroscopy data class with parameters:\n')
         print(f'x_min={self.x_min};\nx_max={self.x_max}\nx_step={self.x_step}\n'
               f'y_min={self.y_min};\ny_max={self.y_max}\ny_step={self.y_step}\n')
-        print(f'number of possible readout points: {self.x_list * self.y_list}')
+        print(f'number of possible readout points: {len(self.x_list) * len(self.y_list)}')
         print(f'heatmap filling percentage: {len(self.raw_frame) / len(self.x_1d) * 100}, %')
 
     def __getattr__(self, name):
