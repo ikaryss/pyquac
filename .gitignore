@@ -140,6 +140,7 @@ cython_debug/
 
 # End of https://www.toptal.com/developers/gitignore/api/python.idea
 .idea/
+.fleet/
 
 #lock fle with current dependencies
 poetry.lock
