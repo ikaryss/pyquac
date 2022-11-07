@@ -439,24 +439,16 @@ class Spectroscopy:
     
     def get_raw_result(self):
         """
-        generates raw Data Frame with columns [x_value, y_value, response]
+        generates raw Data Frame with columns [x_value, y_value, z_value]
         :return: Pandas Data Frame
         """
-        x = []
-        y = []
-        heat = []
+        y_l = (self.get_result().groupby('x_value')['y_value'].apply(list)).reset_index()
+        z_l = (self.get_result().groupby('x_value')['z_value'].apply(list))
+        x_l = z_l.index.to_series(index=np.arange(len(z_l))).to_frame()
+        z_l = z_l.reset_index()
 
-        uniq_x = np.unique(self.raw_frame.x_value.values)
-
-        for xx in uniq_x:
-            y_arr = self.raw_frame[self.raw_frame.x_value == xx].y_value.values
-            heat_arr = self.raw_frame[self.raw_frame.x_value == xx].heat_value.values
-
-            x.append(xx)
-            y.append(y_arr)
-            heat.append(heat_arr)
-
-        return pd.DataFrame({'x_value': x, 'y_value': y, 'response': heat})
+        df = x_l.merge(y_l, on='x_value', how='left').merge(z_l, on='x_value', how='left')
+        return df
 
     @property
     def non_njit_result(self):
