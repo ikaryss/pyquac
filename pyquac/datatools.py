@@ -139,23 +139,28 @@ class Spectroscopy:
                  'x_1d', 'y_1d', '__n_steps', '__len_y', '__x_for_approximate_idxs', '__approximation_y_keys']
 
     def __init__(self, *,
+                 x_arr: Iterable = None, y_arr: Iterable = None,
                  x_min: float = None, x_max: float = None, y_min: float = None, y_max: float = None,
                  x_step: float = None, y_step: float = None, nx_points: int = None, ny_points: int = None,
-                 x_arr: Iterable = None, y_arr: Iterable = None
                  ):
         """
-        Class provides methods for working with live data for heatmap measurements
-        :param x_min: x minimum value
+        Class provides methods for working with live data for heatmap plot measurements.
+        You can defind initial values for the plot via minimum/maximum values on the x-axis and y-axis. Or you can define it via ready-made one-dimensional arrays
+        :param x_arr: x-axis array on the heatmap plot
+        :type x_arr Iterable
+        :param y_arr: y-axis array on the heatmap plot
+        :type y_arr Iterable
+        :param x_min: x minimum value on the heatmap
         :type x_min int | float
-        :param x_max: x maximum value (int | float)
+        :param x_max: x maximum value on the heatmap
         :type x_max int | float
-        :param x_step: x step value (int)
+        :param x_step: x step value on the heatmap
         :type x_step int | float
-        :param y_min: y minimum value (int | float)
+        :param y_min: y minimum value on the heatmap
         :type y_min int | float
-        :param y_max: y maximum value (int | float)
+        :param y_max: y maximum value on the heatmap
         :type y_max int | float
-        :param y_step: y step value (int)
+        :param y_step: y step value on the heatmap
         :type y_step int | float
         """
 
@@ -257,7 +262,7 @@ class Spectroscopy:
 
     def iter_setup(self, *, x_key: Union[float, int, Iterable] = None, y_key: Union[float, int, Iterable] = None,
                    x_min: float = None, x_max: float = None, y_min: float = None, y_max: float = None):
-        """Measurement setup. if all optional params are None then setup self.load and self.frequency for measuring all
+        """Measurement setup. Defines the range of values that will be written to the heatmap. If all optional params are None then setup self.load and self.frequency for measuring all
         data
         :param x_key: x value(s) for measurement
         :type x_key: float | int | Iterable
@@ -363,7 +368,7 @@ class Spectroscopy:
 
     def write(self, *, x: Union[float, int] = None, y: Union[float, int] = None,
               z: Union[float, int] = None):
-        """writes x coord value, y coord value and z coord value to class entity
+        """writes one x coord value, y coord value and z coord value to class entity. You can use this function in a loop to sequentially write the values in the heat map
         :param z: z value
         :type z: float | int
         :param x: x value
@@ -377,6 +382,11 @@ class Spectroscopy:
         pass
 
     def check_stop_on_iter(self, i: int):
+        """
+        marker function for write function. 
+        If you interrupt your jupyter kernel while looping on i iteration and not all values (x; y; z) for this iteration have had time to be written to the arrays, then this will cause an error later on.
+        This function will level the arrays with each other
+        """
         if len(self.x_raw) == len(self.y_raw) == len(self.z_raw):
             pass
         else:
@@ -399,7 +409,7 @@ class Spectroscopy:
 
     @property
     def raw_array(self):
-        """generates raw 2-d numpy array np.array([y_value, x_value])
+        """generates raw 2-d numpy array np.array([y_value, x_value, z_value])
         :return: ndarray
         """
         if len(self.x_raw) == len(self.y_raw) == len(self.z_raw):
@@ -439,7 +449,10 @@ class Spectroscopy:
     
     def get_raw_result(self):
         """
-        generates raw Data Frame with columns [x_value, y_value, z_value]
+        generates raw Data Frame with columns [x_value, y_value, z_value].
+        x_value: float | int
+        y_value: list
+        z_value: list
         :return: Pandas Data Frame
         """
         y_l = (self.get_result().groupby('x_value')['y_value'].apply(list)).reset_index()
@@ -473,7 +486,7 @@ class Spectroscopy:
 
     @property
     def njit_result(self):
-        """generates CPU accelerated resulting 2-d array of z values
+        """generates CPU parallelized resulting 2-d array of z values
         :return: numpy.ndarray
         """
         # array = np.copy(self.raw_array)
@@ -496,13 +509,13 @@ class Spectroscopy:
     def xyz_peak(self, x_key: Iterable = None, thres: float = 0.7,
                  min_dist: int = 75, n_last: int = 20):
         """fit the heatmap curve by finding peak values
-        :param x_key:
+        :param x_key: specify x values you want to find peak values on
         :type x_key: Iterable
-        :param thres:
+        :param thres: [0:1] threshold of the normalized peak to reduce the impact on noise. Values below this threshold will not be taken into account.
         :type thres: float
-        :param min_dist:
+        :param min_dist: minimum possible distance between peak values in array
         :type min_dist: int
-        :param n_last:
+        :param n_last: the number of the highest values, which are taken into account when searching for peak values
         :type n_last: int
         :return: x, y, z tuple of peak values
         """
@@ -564,13 +577,13 @@ class Spectroscopy:
         :type resolving_zone: float
         :param x_key: (optional) list of x values that will be used in approximation
         :type x_key: Iterable
-        :param thres: [0:1] threshold of the normalized peak. default 0.7
+        :param thres: [0:1] threshold of the normalized peak to reduce the impact on noise. Values below this threshold will not be taken into account. default 0.7
         :type thres: float
-        :param min_dist: minimum distant from one peak to another. default 75
+        :param min_dist: minimum possible distance between peak values in array. default 75
         :type min_dist: int
-        :param n_last: nop of max values
+        :param n_last: the number of the highest values, which are taken into account when searching for peak values
         :type n_last: int
-        :param deg: Degree of the fitting polynomial
+        :param deg: degree of the fitting polynomial
         :type deg: int
         :param fillna: if heatmap nan values have to be filled with color
         :return: dict with keys x_key, y_key, mask, imshow_mask, poly_line, poly_coef
@@ -683,7 +696,7 @@ class Spectroscopy:
 
     def cls(self):
         """
-        clean all heatmap
+        clean all heatmap. Deletes all measured data from class entity
         """
         self.x_raw = []
         self.y_raw = []
@@ -699,7 +712,7 @@ class Spectroscopy:
     def drop(self, x: Union[float, int, Iterable] = None, y: Union[float, int, Iterable] = None,
              x_min: float = None, x_max: float = None, y_min: float = None, y_max: float = None):
         """
-        drops specific values (x, y)
+        delete specific values (x, y)
         :param x: x value(s)
         :type x: float | int | Iterable
         :param y: y value(s) [float, int, Iterable]
@@ -742,6 +755,11 @@ class Spectroscopy:
             pass
 
     def load_data(self, raw_file: str):
+        """
+        loads csv file to Spectroscopy class data structure. CSV file must contain three columns ['x_value', 'y_value', 'z_value']. Dtype of each value - Float | int
+        :param raw_file: x value(s)
+        :type raw_file: str
+        """
         raw_csv = pd.read_csv(raw_file)
 
         self.x_raw = list(raw_csv.x_value.values)

@@ -147,4 +147,5 @@ poetry.lock
 
 # jupyter tests
 tech_tests.ipynb
+/examples/random_test.ipynb
 /home_tests
