@@ -7,6 +7,7 @@ from dash import html
 import dash_bootstrap_components as dbc
 from dash_bootstrap_templates import load_figure_template
 from matplotlib.pyplot import cla
+from jupyter_dash import JupyterDash
 
 from settings import settings
 
@@ -37,7 +38,7 @@ CONTENT_STYLE = {
 
 APP_LOGO = settings.app_logo_url
 
-app = dash.Dash(name=settings.app_name, external_stylesheets=[theme, css, icons])
+app = JupyterDash(name=settings.app_name, external_stylesheets=[theme, css, icons])
 app.title = settings.app_name
 
 ########################## Navbar ##########################
