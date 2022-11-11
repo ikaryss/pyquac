@@ -63,7 +63,6 @@ class mrange:
         Avoids also floating point rounding errors as with
         numpy.arange(1, 1.3, 0.1)
         array([1. , 1.1, 1.2, 1.3])
-
         args: [start, ]stop, [step, ]
             as in numpy.arange
         rtol, atol: floats
@@ -113,7 +112,6 @@ class timer:
     """
     timer class provides accurate variation of time.sleep() method. Example:
     timer.sleep(1) #  sleeps for 1. second
-
     Why to use this? If you use time.sleep() for 1 iteration, it wouldn't bring you problem, but if your script
     requires a loop with time.sleep() inside, Windows OS will ruin your script execution. To explain why this
     happened, Windows OS has its default timer resolution set to 15.625 ms or 64 Hz, which is decently enough for
@@ -130,10 +128,8 @@ class timer:
 
 class Spectroscopy:
     """Data class for manipulating live-data for heatmap graph
-
     Raises:
         AttributeError: _description_
-
     Returns:
         _type_: _description_
     """
@@ -166,6 +162,7 @@ class Spectroscopy:
         "__len_y",
         "__x_for_approximate_idxs",
         "__approximation_y_keys",
+        "__z_container_numba"
     ]
 
     def __init__(
@@ -283,6 +280,9 @@ class Spectroscopy:
         self.__z_container[:] = np.nan
         self.__x_container = np.zeros(len(self.x_list) * len(self.y_list))
         self.__y_container = np.zeros(len(self.x_list) * len(self.y_list))
+
+        self.__z_container_numba = np.zeros(len(self.x_list) * len(self.y_list))
+        self.__z_container_numba[:] = np.nan
 
         self.x_1d = np.repeat(self.x_list, len(self.y_list))
         self.y_1d = np.tile(self.y_list, len(self.x_list))
@@ -620,7 +620,7 @@ class Spectroscopy:
             x_val, y_val, self.x_min, self.x_step, self.y_min, self.y_step, self.__len_y
         )
         if len(self.x_raw) >= 2:
-            array_to_process = np.copy(self.__z_container)
+            array_to_process = np.copy(self.__z_container_numba)
             array_to_process[ind_array.astype(int)] = z_val
 
             return array_to_process
@@ -952,7 +952,7 @@ class Spectroscopy:
             self.__drop_the_cols(x, y)
             pass
 
-    def load_data(self, raw_file: str):
+    def load_data(self, raw_file: str, x_col_name:str = 'x_value', y_col_name:str = 'y_value', z_col_name:str = 'z_value'):
         """
         loads csv file to Spectroscopy class data structure. CSV file must contain three columns ['x_value', 'y_value', 'z_value']. Dtype of each value - Float | int
         :param raw_file: x value(s)
@@ -960,9 +960,9 @@ class Spectroscopy:
         """
         raw_csv = pd.read_csv(raw_file)
 
-        self.x_raw = list(raw_csv.x_value.values)
-        self.y_raw = list(raw_csv.y_value.values)
-        self.z_raw = list(raw_csv.z_value.values)
+        self.x_raw = list(raw_csv[x_col_name].values)
+        self.y_raw = list(raw_csv[y_col_name].values)
+        self.z_raw = list(raw_csv[z_col_name].values)
 
     def __drop_the(self, column: str, value_s: Union[float, int, Iterable]):
 
