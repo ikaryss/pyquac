@@ -144,6 +144,12 @@ cython_debug/
 #lock fle with current dependencies
 poetry.lock
 
+/.github
+
 # jupyter tests
 tech_tests.ipynb
 /home_tests
+/pyquac/ddd.csv
+/pyquac/jyp_app.ipynb
+/examples/random_test.ipynb
+/.vscode
