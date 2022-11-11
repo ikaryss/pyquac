@@ -2,6 +2,7 @@
 from time import perf_counter
 from typing import Iterable, Union, Sized
 import time
+
 # installable libraries
 import pandas as pd
 import numpy as np
@@ -11,8 +12,7 @@ import peakutils
 
 
 @nb.jit(nopython=True)
-def _complicated(raw_array_x, raw_array_y, x_min_, x_step_, y_min_, y_step_,
-                 len_y_):
+def _complicated(raw_array_x, raw_array_y, x_min_, x_step_, y_min_, y_step_, len_y_):
     ind_array = np.zeros(len(raw_array_x))
 
     if len(ind_array) >= 2:
@@ -29,17 +29,16 @@ def _complicated(raw_array_x, raw_array_y, x_min_, x_step_, y_min_, y_step_,
 
 
 class SortingTools:
-
     def __init__(self):
         pass
 
     @staticmethod
     def k_max_idxs(arr, k):
         """
-            Returns the indices of the k first largest elements of arr
-            (in descending order in values)
+        Returns the indices of the k first largest elements of arr
+        (in descending order in values)
         """
-        assert k <= arr.size, 'k should be smaller or equal to the array size'
+        assert k <= arr.size, "k should be smaller or equal to the array size"
         arr_ = arr.astype(float)  # make a copy of arr
         max_idxs = []
         ful_max_idxs = []
@@ -56,7 +55,6 @@ class SortingTools:
 
 
 class mrange:
-
     @classmethod
     def cust_range(cls, *args, rtol=1e-05, atol=1e-08, include=(True, False)):
         """
@@ -131,18 +129,59 @@ class timer:
 
 
 class Spectroscopy:
-    __slots__ = ['x_min', 'x_max', 'x_step', '__x_step_DP', 'x_list', 'nx_steps',
-                 'y_min', 'y_max', 'y_step', '__y_step_DP', 'y_list', 'ny_steps',
-                 'load', 'frequency',
-                 'x_raw', 'y_raw', 'z_raw',
-                 '__z_2d', '__x_container', '__y_container', '__z_container',
-                 'x_1d', 'y_1d', '__n_steps', '__len_y', '__x_for_approximate_idxs', '__approximation_y_keys']
+    """Data class for manipulating live-data for heatmap graph
 
-    def __init__(self, *,
-                 x_arr: Iterable = None, y_arr: Iterable = None,
-                 x_min: float = None, x_max: float = None, y_min: float = None, y_max: float = None,
-                 x_step: float = None, y_step: float = None, nx_points: int = None, ny_points: int = None,
-                 ):
+    Raises:
+        AttributeError: _description_
+
+    Returns:
+        _type_: _description_
+    """
+
+    __slots__ = [
+        "x_min",
+        "x_max",
+        "x_step",
+        "__x_step_DP",
+        "x_list",
+        "nx_steps",
+        "y_min",
+        "y_max",
+        "y_step",
+        "__y_step_DP",
+        "y_list",
+        "ny_steps",
+        "load",
+        "frequency",
+        "x_raw",
+        "y_raw",
+        "z_raw",
+        "__z_2d",
+        "__x_container",
+        "__y_container",
+        "__z_container",
+        "x_1d",
+        "y_1d",
+        "__n_steps",
+        "__len_y",
+        "__x_for_approximate_idxs",
+        "__approximation_y_keys",
+    ]
+
+    def __init__(
+        self,
+        *,
+        x_arr: Iterable = None,
+        y_arr: Iterable = None,
+        x_min: float = None,
+        x_max: float = None,
+        y_min: float = None,
+        y_max: float = None,
+        x_step: float = None,
+        y_step: float = None,
+        nx_points: int = None,
+        ny_points: int = None,
+    ):
         """
         Class provides methods for working with live data for heatmap plot measurements.
         You can defind initial values for the plot via minimum/maximum values on the x-axis and y-axis. Or you can define it via ready-made one-dimensional arrays
@@ -176,18 +215,22 @@ class Spectroscopy:
                 self.x_step = float(x_step)
             self.__x_step_DP = len(str(self.x_step).split(".")[1])
 
-            self.x_list = mrange.orange(self.x_min, self.x_max + self.x_step,
-                                        self.x_step)
+            self.x_list = mrange.orange(
+                self.x_min, self.x_max + self.x_step, self.x_step
+            )
             self.x_list = np.around(self.x_list, decimals=self.__x_step_DP)
 
         else:
             self.x_min = x_arr[0]
             self.x_max = x_arr[-1]
-            _, self.x_step = np.linspace(self.x_min, self.x_max, len(x_arr), retstep=True)
+            _, self.x_step = np.linspace(
+                self.x_min, self.x_max, len(x_arr), retstep=True
+            )
             self.x_step = round(self.x_step, 10)
             self.__x_step_DP = len(str(self.x_step).split(".")[1])
-            self.x_list = mrange.orange(self.x_min, self.x_max + self.x_step,
-                                        self.x_step)
+            self.x_list = mrange.orange(
+                self.x_min, self.x_max + self.x_step, self.x_step
+            )
             self.x_list = np.around(self.x_list, decimals=self.__x_step_DP)
 
         "generating y list with proper step"
@@ -202,18 +245,22 @@ class Spectroscopy:
                 self.y_step = float(y_step)
             self.__y_step_DP = len(str(self.y_step).split(".")[1])
 
-            self.y_list = mrange.orange(self.y_min, self.y_max + self.y_step,
-                                        self.y_step)
+            self.y_list = mrange.orange(
+                self.y_min, self.y_max + self.y_step, self.y_step
+            )
             self.y_list = np.around(self.y_list, decimals=self.__y_step_DP)
 
         else:
             self.y_min = y_arr[0]
             self.y_max = y_arr[-1]
-            _, self.y_step = np.linspace(self.y_min, self.y_max, len(y_arr), retstep=True)
+            _, self.y_step = np.linspace(
+                self.y_min, self.y_max, len(y_arr), retstep=True
+            )
             self.y_step = round(self.y_step, 10)
             self.__y_step_DP = len(str(self.y_step).split(".")[1])
-            self.y_list = mrange.orange(self.y_min, self.y_max + self.y_step,
-                                        self.y_step)
+            self.y_list = mrange.orange(
+                self.y_min, self.y_max + self.y_step, self.y_step
+            )
             self.y_list = np.around(self.y_list, decimals=self.__y_step_DP)
 
         self.load = None
@@ -251,17 +298,31 @@ class Spectroscopy:
         return len(self.raw_array)
 
     def __call__(self):
-        print('Base spectroscopy data class with parameters:\n')
-        print(f'x_min={self.x_min};\nx_max={self.x_max}\nx_step={self.x_step}\n'
-              f'y_min={self.y_min};\ny_max={self.y_max}\ny_step={self.y_step}\n')
-        print(f'number of possible readout points: {len(self.x_list) * len(self.y_list)}')
-        print(f'heatmap filling percentage: {len(self.raw_frame) / len(self.x_1d) * 100}, %')
+        print("Base spectroscopy data class with parameters:\n")
+        print(
+            f"x_min={self.x_min};\nx_max={self.x_max}\nx_step={self.x_step}\n"
+            f"y_min={self.y_min};\ny_max={self.y_max}\ny_step={self.y_step}\n"
+        )
+        print(
+            f"number of possible readout points: {len(self.x_list) * len(self.y_list)}"
+        )
+        print(
+            f"heatmap filling percentage: {len(self.raw_frame) / len(self.x_1d) * 100}, %"
+        )
 
     def __getattr__(self, name):
         raise AttributeError(f"Class Spectroscopy doesn't have {str(name)} attribute")
 
-    def iter_setup(self, *, x_key: Union[float, int, Iterable] = None, y_key: Union[float, int, Iterable] = None,
-                   x_min: float = None, x_max: float = None, y_min: float = None, y_max: float = None):
+    def iter_setup(
+        self,
+        *,
+        x_key: Union[float, int, Iterable] = None,
+        y_key: Union[float, int, Iterable] = None,
+        x_min: float = None,
+        x_max: float = None,
+        y_min: float = None,
+        y_max: float = None,
+    ):
         """Measurement setup. Defines the range of values that will be written to the heatmap. If all optional params are None then setup self.load and self.frequency for measuring all
         data
         :param x_key: x value(s) for measurement
@@ -287,22 +348,51 @@ class Spectroscopy:
             else:
                 y_key = np.unique(self.__config_closest_values(y_key, self.y_list))
 
-        "set x_min x_max arrays"
-        if (y_min is not None) | (y_max is not None) | (x_min is not None) | (x_max is not None):
-            x_key = self.__config_arrays_from(min_value=x_min, max_value=x_max, step=self.x_step,
-                                              array=self.x_list, array_set_input_in_func=x_key, column='x_value')
+        # set x_min x_max arrays
+        if (
+            (y_min is not None)
+            | (y_max is not None)
+            | (x_min is not None)
+            | (x_max is not None)
+        ):
+            x_key = self.__config_arrays_from(
+                min_value=x_min,
+                max_value=x_max,
+                step=self.x_step,
+                array=self.x_list,
+                array_set_input_in_func=x_key,
+                column="x_value",
+            )
 
-            y_key = self.__config_arrays_from(min_value=y_min, max_value=y_max, step=self.y_step,
-                                              array=self.y_list, array_set_input_in_func=y_key, column='y_value')
+            y_key = self.__config_arrays_from(
+                min_value=y_min,
+                max_value=y_max,
+                step=self.y_step,
+                array=self.y_list,
+                array_set_input_in_func=y_key,
+                column="y_value",
+            )
 
         if x_key is not None:
-            x_key = x_key if isinstance(x_key, Iterable) else [x_key, ]
+            x_key = (
+                x_key
+                if isinstance(x_key, Iterable)
+                else [
+                    x_key,
+                ]
+            )
 
         x = np.array(x_key) if x_key is not None else np.array(self.x_list)
 
         """config frequencies"""
         if y_key is not None:
-            y_key = y_key if isinstance(y_key, Iterable) else [y_key, ]
+            y_key = (
+                y_key
+                if isinstance(y_key, Iterable)
+                else [
+                    y_key,
+                ]
+            )
             if np.array(y_key).dtype != object:
                 y_key = np.tile(y_key, [len(x), 1])
             elif np.array(y_key).dtype == object and x_key is not None:
@@ -332,7 +422,12 @@ class Spectroscopy:
             if np.array(y_key).dtype == object:
                 current_encapsulated = []
                 for i, y_i in enumerate(y_key):
-                    current_encapsulated.append([x[i], ] * len(y_i))
+                    current_encapsulated.append(
+                        [
+                            x[i],
+                        ]
+                        * len(y_i)
+                    )
 
                 if np.array(y_key).dtype == object:
                     currents = []
@@ -346,7 +441,12 @@ class Spectroscopy:
             else:
                 current_encapsulated = []
                 for i, y_i in enumerate(y_key):
-                    current_encapsulated.append([x[i], ] * len(y_i))
+                    current_encapsulated.append(
+                        [
+                            x[i],
+                        ]
+                        * len(y_i)
+                    )
                 currents = np.array(current_encapsulated).ravel()
                 pass
 
@@ -354,20 +454,29 @@ class Spectroscopy:
             currents = np.repeat(x, len(self.y_list))
 
         "collect all together"
-        temp_df = pd.DataFrame({'x_value': currents, 'y_value': freqs})
+        temp_df = pd.DataFrame({"x_value": currents, "y_value": freqs})
         raw_frame_without_nans = self.raw_frame.dropna(axis=0)
 
-        index1 = pd.MultiIndex.from_arrays([temp_df[col] for col in ['x_value', 'y_value']])
-        index2 = pd.MultiIndex.from_arrays([raw_frame_without_nans[col] for col in ['x_value', 'y_value']])
+        index1 = pd.MultiIndex.from_arrays(
+            [temp_df[col] for col in ["x_value", "y_value"]]
+        )
+        index2 = pd.MultiIndex.from_arrays(
+            [raw_frame_without_nans[col] for col in ["x_value", "y_value"]]
+        )
         temp_df = temp_df.loc[~index1.isin(index2)]
 
-        self.load = np.around(temp_df['x_value'].values, decimals=self.__x_step_DP)
-        self.frequency = np.around(temp_df['y_value'].values, decimals=self.__y_step_DP)
+        self.load = np.around(temp_df["x_value"].values, decimals=self.__x_step_DP)
+        self.frequency = np.around(temp_df["y_value"].values, decimals=self.__y_step_DP)
 
         pass
 
-    def write(self, *, x: Union[float, int] = None, y: Union[float, int] = None,
-              z: Union[float, int] = None):
+    def write(
+        self,
+        *,
+        x: Union[float, int] = None,
+        y: Union[float, int] = None,
+        z: Union[float, int] = None,
+    ):
         """writes one x coord value, y coord value and z coord value to class entity. You can use this function in a loop to sequentially write the values in the heat map
         :param z: z value
         :type z: float | int
@@ -383,7 +492,7 @@ class Spectroscopy:
 
     def check_stop_on_iter(self, i: int):
         """
-        marker function for write function. 
+        marker function for write function.
         If you interrupt your jupyter kernel while looping on i iteration and not all values (x; y; z) for this iteration have had time to be written to the arrays, then this will cause an error later on.
         This function will level the arrays with each other
         """
@@ -403,7 +512,9 @@ class Spectroscopy:
         :return: dataframe
         """
         if len(self.x_raw) == len(self.y_raw) == len(self.z_raw):
-            return pd.DataFrame({'x_value': self.x_raw, 'y_value': self.y_raw, 'z_value': self.z_raw})
+            return pd.DataFrame(
+                {"x_value": self.x_raw, "y_value": self.y_raw, "z_value": self.z_raw}
+            )
         else:
             pass
 
@@ -423,30 +534,34 @@ class Spectroscopy:
         :type imshow: bool
         :return: Pandas Data Frame. column.names: ['x_value', 'y_value', 'z_value']
         """
-        l_h = len(self.__z_container[:len(self.z_raw)])
-        l_x = len(self.__x_container[:len(self.x_raw)])
-        l_y = len(self.__y_container[:len(self.y_raw)])
+        l_h = len(self.__z_container[: len(self.z_raw)])
+        l_x = len(self.__x_container[: len(self.x_raw)])
+        l_y = len(self.__y_container[: len(self.y_raw)])
 
         if l_h == l_x == l_y:
-            self.__z_container[:len(self.z_raw)] = self.z_raw
-            self.__x_container[:len(self.x_raw)] = self.x_raw
-            self.__y_container[:len(self.y_raw)] = self.y_raw
+            self.__z_container[: len(self.z_raw)] = self.z_raw
+            self.__x_container[: len(self.x_raw)] = self.x_raw
+            self.__y_container[: len(self.y_raw)] = self.y_raw
         else:
             pass
 
         for i in range(len(self.x_raw)):
-            self.__z_2d[round((self.__y_container[i] - self.y_min) / self.y_step),
-                        round((self.__x_container[i] - self.x_min) / self.x_step)] = self.__z_container[i]
+            self.__z_2d[
+                round((self.__y_container[i] - self.y_min) / self.y_step),
+                round((self.__x_container[i] - self.x_min) / self.x_step),
+            ] = self.__z_container[i]
 
-        z_1d = self.__z_2d.ravel(order='F')
+        z_1d = self.__z_2d.ravel(order="F")
 
         if not imshow:
-            df = pd.DataFrame({'x_value': self.x_1d, 'y_value': self.y_1d, 'z_value': z_1d})
+            df = pd.DataFrame(
+                {"x_value": self.x_1d, "y_value": self.y_1d, "z_value": z_1d}
+            )
         else:
             df = pd.DataFrame(data=self.__z_2d, columns=self.x_list, index=self.y_list)
 
         return df
-    
+
     def get_raw_result(self):
         """
         generates raw Data Frame with columns [x_value, y_value, z_value].
@@ -455,12 +570,16 @@ class Spectroscopy:
         z_value: list
         :return: Pandas Data Frame
         """
-        y_l = (self.get_result().groupby('x_value')['y_value'].apply(list)).reset_index()
-        z_l = (self.get_result().groupby('x_value')['z_value'].apply(list))
+        y_l = (
+            self.get_result().groupby("x_value")["y_value"].apply(list)
+        ).reset_index()
+        z_l = self.get_result().groupby("x_value")["z_value"].apply(list)
         x_l = z_l.index.to_series(index=np.arange(len(z_l))).to_frame()
         z_l = z_l.reset_index()
 
-        df = x_l.merge(y_l, on='x_value', how='left').merge(z_l, on='x_value', how='left')
+        df = x_l.merge(y_l, on="x_value", how="left").merge(
+            z_l, on="x_value", how="left"
+        )
         return df
 
     @property
@@ -476,8 +595,10 @@ class Spectroscopy:
             y_val = array[1, :]
 
             for i in range(len(z_val)):
-                self.__z_2d[round((y_val[i] - self.y_min) / self.y_step),
-                            round((x_val[i] - self.x_min) / self.x_step)] = z_val[i]
+                self.__z_2d[
+                    round((y_val[i] - self.y_min) / self.y_step),
+                    round((x_val[i] - self.x_min) / self.x_step),
+                ] = z_val[i]
 
             return self.__z_2d
 
@@ -495,9 +616,9 @@ class Spectroscopy:
         y_val = array_to_njit[1, :]
         z_val = array_to_njit[2, :]
 
-        ind_array = _complicated(x_val, y_val,
-                                 self.x_min, self.x_step, self.y_min, self.y_step,
-                                 self.__len_y)
+        ind_array = _complicated(
+            x_val, y_val, self.x_min, self.x_step, self.y_min, self.y_step, self.__len_y
+        )
         if len(self.x_raw) >= 2:
             array_to_process = np.copy(self.__z_container)
             array_to_process[ind_array.astype(int)] = z_val
@@ -506,9 +627,14 @@ class Spectroscopy:
         else:
             pass
 
-    def xyz_peak(self, x_key: Iterable = None, thres: float = 0.7,
-                 min_dist: int = 75, n_last: int = 20):
-        """fit the heatmap curve by finding peak values
+    def xyz_peak(
+        self,
+        x_key: Iterable = None,
+        thres: float = 0.7,
+        min_dist: int = 75,
+        n_last: int = 20,
+    ):
+        """finding peak values
         :param x_key: specify x values you want to find peak values on
         :type x_key: Iterable
         :param thres: [0:1] threshold of the normalized peak to reduce the impact on noise. Values below this threshold will not be taken into account.
@@ -526,20 +652,23 @@ class Spectroscopy:
             x_set = x_key
         else:
             X = self.raw_frame.copy()
-            """rows that we are looking for (every x_value)"""
-            x_set = np.unique(X['x_value'].values)  # get an array of unique values of x
+            # rows that we are looking for (every x_value)
+            x_set = np.unique(X["x_value"].values)  # get an array of unique values of x
 
         tuple_list = ()
         for xx in x_set:
             z = X[X.x_value == xx].z_value.values
             y = X[X.x_value == xx].y_value.values
 
+            # calculating the mode of the distribution
             mode_res = stats.mode(np.around(z), axis=None)[0][0]
+            # calculating the delta between the mode and the values in the array
             deltas = abs(abs(z) - abs(mode_res))
+            # calculation of the k indices of largest values
             _, n_last_idxs = SortingTools.k_max_idxs(deltas, n_last)
-
+            # finding peak values using peak utils
             peak_idxs = peakutils.indexes(abs(z), thres=thres, min_dist=min_dist)
-
+            # searching for intersecting values
             peak_and_delta = np.where(np.isin(peak_idxs, n_last_idxs))[0]
 
             if isinstance(peak_and_delta[0], np.ndarray):
@@ -557,8 +686,18 @@ class Spectroscopy:
             if len(X[X.x_value == xx].y_value) <= 0.7 * len(self.y_list):
                 temp_y_idx = (X[X.x_value == xx].z_value - z_sample).abs().idxmin()
             else:
-                temp_y_idx = (X[(X.x_value == xx) & (X.y_value >= y_min) & (X.y_value <= y_max)
-                                ].z_value - z_sample).abs().idxmin()
+                temp_y_idx = (
+                    (
+                        X[
+                            (X.x_value == xx)
+                            & (X.y_value >= y_min)
+                            & (X.y_value <= y_max)
+                        ].z_value
+                        - z_sample
+                    )
+                    .abs()
+                    .idxmin()
+                )
 
             temp_max_row = tuple(X.iloc[temp_y_idx])
 
@@ -567,9 +706,18 @@ class Spectroscopy:
         tuple_of_max_z_values = np.array(tuple_list).T
         return tuple_of_max_z_values
 
-    def approximate(self, poly_nop: int = 1000, resolving_zone: float = 0.1, *,
-                    x_key: Iterable = None, thres: float = 0.7, min_dist: int = 75, n_last: int = 20,
-                    deg: int = 2, fillna: bool = False):
+    def approximate(
+        self,
+        poly_nop: int = 1000,
+        resolving_zone: float = 0.1,
+        *,
+        x_key: Iterable = None,
+        thres: float = 0.7,
+        min_dist: int = 75,
+        n_last: int = 20,
+        deg: int = 2,
+        fillna: bool = False,
+    ):
         """approximating measured data with polyline of chosen degree
         :param poly_nop: number of points in fitted curve
         :type poly_nop: int
@@ -596,14 +744,18 @@ class Spectroscopy:
         else:
             X = self.raw_frame.copy()
             """rows that we are looking for (every x_value)"""
-            x_set = np.unique(X['x_value'].values)  # get an array of unique values of x
+            x_set = np.unique(X["x_value"].values)  # get an array of unique values of x
 
-        tuple_of_max_z_values = self.xyz_peak(x_key=x_set, thres=thres, min_dist=min_dist, n_last=n_last)
-        print('x', tuple_of_max_z_values[0])
-        print('y', tuple_of_max_z_values[1])
+        tuple_of_max_z_values = self.xyz_peak(
+            x_key=x_set, thres=thres, min_dist=min_dist, n_last=n_last
+        )
+        print("x", tuple_of_max_z_values[0])
+        print("y", tuple_of_max_z_values[1])
 
         # creating poly curve
-        poly = np.poly1d(np.polyfit(x=tuple_of_max_z_values[0], y=tuple_of_max_z_values[1], deg=deg))
+        poly = np.poly1d(
+            np.polyfit(x=tuple_of_max_z_values[0], y=tuple_of_max_z_values[1], deg=deg)
+        )
         poly_x = np.linspace(self.x_min, self.x_max, poly_nop)
 
         """getting freq values for approximation"""
@@ -622,26 +774,40 @@ class Spectroscopy:
         max_z_sample = tuple_of_max_z_values[2].mean()
 
         get_result_df = self.get_result()
-        get_result_df.loc[:, 'z_value'] = min_z_sample
+        get_result_df.loc[:, "z_value"] = min_z_sample
 
         for i in range(len(y_for_approximate)):
-            get_result_mask = (get_result_df['x_value'] == self.x_list[i]) & (
-                    get_result_df['y_value'] == y_for_approximate[i])
-            get_result_df.loc[get_result_mask, 'z_value'] = max_z_sample
+            get_result_mask = (get_result_df["x_value"] == self.x_list[i]) & (
+                get_result_df["y_value"] == y_for_approximate[i]
+            )
+            get_result_df.loc[get_result_mask, "z_value"] = max_z_sample
 
         """approximation"""
         y_keys = []
 
         for xx in self.x_list:
-            idx = get_result_df[get_result_df.x_value == xx].loc[get_result_df.z_value == max_z_sample].index[0]
+            idx = (
+                get_result_df[get_result_df.x_value == xx]
+                .loc[get_result_df.z_value == max_z_sample]
+                .index[0]
+            )
 
             count_of_resolve_idx = len(self.y_list) * resolving_zone
-            get_result_df.iloc[idx + 1:idx + round(count_of_resolve_idx / 2), 2] = max_z_sample / 2
+            get_result_df.iloc[idx + 1 : idx + round(count_of_resolve_idx / 2), 2] = (
+                max_z_sample / 2
+            )
 
-            get_result_df.iloc[idx - round(count_of_resolve_idx / 2):idx, 2] = max_z_sample / 2
+            get_result_df.iloc[idx - round(count_of_resolve_idx / 2) : idx, 2] = (
+                max_z_sample / 2
+            )
             y_keys.append(
-                get_result_df.iloc[idx - int(count_of_resolve_idx / 2):
-                                   idx + int(count_of_resolve_idx / 2), 1].to_list())
+                get_result_df.iloc[
+                    idx
+                    - int(count_of_resolve_idx / 2) : idx
+                    + int(count_of_resolve_idx / 2),
+                    1,
+                ].to_list()
+            )
 
             self.__approximation_y_keys = np.array(y_keys, dtype=object)
 
@@ -657,18 +823,24 @@ class Spectroscopy:
         """imshow"""
         z_list = []
         for xx in self.x_list:
-            z_list.append(get_result_df[get_result_df.x_value == xx].loc[:, 'z_value'].values)
-        get_imshow_result_df = pd.DataFrame(data=np.array(z_list).T, columns=self.x_list, index=self.y_list)
+            z_list.append(
+                get_result_df[get_result_df.x_value == xx].loc[:, "z_value"].values
+            )
+        get_imshow_result_df = pd.DataFrame(
+            data=np.array(z_list).T, columns=self.x_list, index=self.y_list
+        )
 
         "deleting bad x approximation"
         x_keys = np.delete(self.x_list, self.__x_for_approximate_idxs)
 
-        return dict(y_key=np.array(y_keys, dtype=object),
-                    x_key=x_keys,
-                    mask=get_result_df,
-                    imshow_mask=get_imshow_result_df,
-                    poly_line={'x': poly_x, 'y': poly(poly_x)},
-                    poly_coef=poly.c)
+        return dict(
+            y_key=np.array(y_keys, dtype=object),
+            x_key=x_keys,
+            mask=get_result_df,
+            imshow_mask=get_imshow_result_df,
+            poly_line={"x": poly_x, "y": poly(poly_x)},
+            poly_coef=poly.c,
+        )
 
     def clean_up(self):
         """
@@ -677,8 +849,10 @@ class Spectroscopy:
         i = 0
         for x in np.array(self.x_list, dtype=float):
             array2 = np.array(self.__approximation_y_keys[i], dtype=float)
-            mask_arr = ~np.isclose(self.raw_frame['y_value'].values[:, None], array2, atol=.1).any(axis=1)
-            idx = self.raw_frame[mask_arr & (self.raw_frame['x_value'] == x)].index
+            mask_arr = ~np.isclose(
+                self.raw_frame["y_value"].values[:, None], array2, atol=0.1
+            ).any(axis=1)
+            idx = self.raw_frame[mask_arr & (self.raw_frame["x_value"] == x)].index
 
             self.x_raw = np.delete(self.x_raw, idx)
             self.y_raw = np.delete(self.y_raw, idx)
@@ -709,8 +883,15 @@ class Spectroscopy:
         self.__x_container[:] = 0
         self.__y_container[:] = 0
 
-    def drop(self, x: Union[float, int, Iterable] = None, y: Union[float, int, Iterable] = None,
-             x_min: float = None, x_max: float = None, y_min: float = None, y_max: float = None):
+    def drop(
+        self,
+        x: Union[float, int, Iterable] = None,
+        y: Union[float, int, Iterable] = None,
+        x_min: float = None,
+        x_max: float = None,
+        y_min: float = None,
+        y_max: float = None,
+    ):
         """
         delete specific values (x, y)
         :param x: x value(s)
@@ -735,19 +916,36 @@ class Spectroscopy:
             y = self.__config_closest_values(y, self.raw_array[1, :])
 
         "set min max arrays"
-        if (y_min is not None) | (y_max is not None) | (x_min is not None) | (x_max is not None):
-            x = self.__config_arrays_from(min_value=x_min, max_value=x_max, step=self.x_step,
-                                          array=self.raw_array[0, :], array_set_input_in_func=x, column='x_value')
+        if (
+            (y_min is not None)
+            | (y_max is not None)
+            | (x_min is not None)
+            | (x_max is not None)
+        ):
+            x = self.__config_arrays_from(
+                min_value=x_min,
+                max_value=x_max,
+                step=self.x_step,
+                array=self.raw_array[0, :],
+                array_set_input_in_func=x,
+                column="x_value",
+            )
 
-            y = self.__config_arrays_from(min_value=y_min, max_value=y_max, step=self.y_step,
-                                          array=self.raw_array[1, :], array_set_input_in_func=y, column='y_value')
+            y = self.__config_arrays_from(
+                min_value=y_min,
+                max_value=y_max,
+                step=self.y_step,
+                array=self.raw_array[1, :],
+                array_set_input_in_func=y,
+                column="y_value",
+            )
 
         if (x is not None) and (y is None):
-            self.__drop_the('x_value', x)
+            self.__drop_the("x_value", x)
             pass
 
         if (y is not None) and (x is None):
-            self.__drop_the('y_value', y)
+            self.__drop_the("y_value", y)
             pass
 
         if (x is not None) and (y is not None):
@@ -768,9 +966,15 @@ class Spectroscopy:
 
     def __drop_the(self, column: str, value_s: Union[float, int, Iterable]):
 
-        decimals = self.__x_step_DP if column == 'x_value' else self.__y_step_DP
+        decimals = self.__x_step_DP if column == "x_value" else self.__y_step_DP
 
-        value_s = list(value_s) if isinstance(value_s, Iterable) else [value_s, ]
+        value_s = (
+            list(value_s)
+            if isinstance(value_s, Iterable)
+            else [
+                value_s,
+            ]
+        )
         value_s = np.around(value_s, decimals=decimals)
         idx = self.raw_frame[self.raw_frame[column].isin(value_s)].index
 
@@ -782,11 +986,11 @@ class Spectroscopy:
         self.__x_container[:] = 0
         self.__y_container[:] = 0
 
-        column_var = list(self.x_list) if column == 'x_value' else list(self.y_list)
+        column_var = list(self.x_list) if column == "x_value" else list(self.y_list)
 
         col_idx_list = [list(column_var).index(value_s[i]) for i in range(len(value_s))]
 
-        if column == 'x_value':
+        if column == "x_value":
             for i in col_idx_list:
                 self.__z_2d[:, i] = self.__z_2d[:, i] * np.nan
         else:
@@ -795,22 +999,46 @@ class Spectroscopy:
 
         pass
 
-    def __drop_the_cols(self, x_values: Union[float, int, Iterable], y_values: Union[float, int, Iterable]):
+    def __drop_the_cols(
+        self,
+        x_values: Union[float, int, Iterable],
+        y_values: Union[float, int, Iterable],
+    ):
 
         x_decimals, y_decimals = self.__x_step_DP, self.__y_step_DP
 
         # x mask
-        x_value_s = list(x_values) if isinstance(x_values, Iterable) else [x_values, ]
+        x_value_s = (
+            list(x_values)
+            if isinstance(x_values, Iterable)
+            else [
+                x_values,
+            ]
+        )
         x_value_s = np.around(x_value_s, decimals=x_decimals)
-        x_mask = np.logical_or.reduce(np.isclose(self.raw_frame['x_value'].to_numpy()[None, :], x_value_s[:, None]))
+        x_mask = np.logical_or.reduce(
+            np.isclose(
+                self.raw_frame["x_value"].to_numpy()[None, :], x_value_s[:, None]
+            )
+        )
 
         # y mask
-        y_value_s = list(y_values) if isinstance(y_values, Iterable) else [y_values, ]
+        y_value_s = (
+            list(y_values)
+            if isinstance(y_values, Iterable)
+            else [
+                y_values,
+            ]
+        )
         y_value_s = np.around(y_value_s, decimals=y_decimals)
-        y_mask = np.logical_or.reduce(np.isclose(self.raw_frame['y_value'].to_numpy()[None, :], y_value_s[:, None]))
+        y_mask = np.logical_or.reduce(
+            np.isclose(
+                self.raw_frame["y_value"].to_numpy()[None, :], y_value_s[:, None]
+            )
+        )
 
         # idx
-        msk = pd.DataFrame({'y': y_mask, 'x': x_mask}).all(axis=1)
+        msk = pd.DataFrame({"y": y_mask, "x": x_mask}).all(axis=1)
         idx = self.raw_frame[msk].index
 
         self.x_raw = list(np.delete(self.x_raw, idx))
@@ -821,15 +1049,21 @@ class Spectroscopy:
         self.__x_container[:] = 0
         self.__y_container[:] = 0
 
-        x_col_idx_list = [list(self.x_list).index(x_value_s[i]) for i in range(len(x_value_s))]
-        y_col_idx_list = [list(self.y_list).index(y_value_s[i]) for i in range(len(y_value_s))]
+        x_col_idx_list = [
+            list(self.x_list).index(x_value_s[i]) for i in range(len(x_value_s))
+        ]
+        y_col_idx_list = [
+            list(self.y_list).index(y_value_s[i]) for i in range(len(y_value_s))
+        ]
 
         for i in x_col_idx_list:
             for j in y_col_idx_list:
                 self.__z_2d[j, i] = self.__z_2d[j, i] * np.nan
         pass
 
-    def __config_closest_values(self, input_value: Union[float, int, Iterable], base_array: Iterable):
+    def __config_closest_values(
+        self, input_value: Union[float, int, Iterable], base_array: Iterable
+    ):
 
         """
         if x list is given then find the nearest values in self.x_list
@@ -843,13 +1077,21 @@ class Spectroscopy:
         else:
             input_value_temp = []
             for value in input_value:
-                input_value_temp.append(self.__find_nearest_universal(base_array, value))
+                input_value_temp.append(
+                    self.__find_nearest_universal(base_array, value)
+                )
             input_value = np.array(input_value_temp)
         return input_value
 
-    def __config_arrays_from(self, min_value: float, max_value: float, step: float,
-                             array: Union[float, int, Iterable], array_set_input_in_func: Union[float, int, Iterable],
-                             column: str = 'x_value'):
+    def __config_arrays_from(
+        self,
+        min_value: float,
+        max_value: float,
+        step: float,
+        array: Union[float, int, Iterable],
+        array_set_input_in_func: Union[float, int, Iterable],
+        column: str = "x_value",
+    ):
 
         """configurate arrays from given values"""
 
@@ -860,7 +1102,7 @@ class Spectroscopy:
             return array
 
         elif (min_value is not None) and (max_value is None):
-            if column == 'x_value':
+            if column == "x_value":
                 max_v = self.x_max
                 step_v = self.x_step
             else:
@@ -871,7 +1113,7 @@ class Spectroscopy:
             array = mrange.orange(min_value, max_v + step_v, step_v)
             return array
         elif (min_value is None) and (max_value is not None):
-            if column == 'x_value':
+            if column == "x_value":
                 min_v = self.x_min
                 step_v = self.x_step
             else:
@@ -897,7 +1139,7 @@ class Spectroscopy:
         weight = np.array(weightGauss) * weight
         smoothed = [0.0] * (len(list1) - window)
         for i in range(len(smoothed)):
-            smoothed[i] = sum(np.array(list1[i:i + window]) * weight) / sum(weight)
+            smoothed[i] = sum(np.array(list1[i : i + window]) * weight) / sum(weight)
         return np.array(smoothed)
 
     def __find_nearest_universal(self, arr, value):

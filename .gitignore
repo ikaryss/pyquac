@@ -149,3 +149,6 @@ poetry.lock
 tech_tests.ipynb
 /examples/random_test.ipynb
 /home_tests
+/pyquac/ddd.csv
+/pyquac/jyp_app.ipynb
+.vscode
