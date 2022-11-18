@@ -162,7 +162,7 @@ class Spectroscopy:
         "__len_y",
         "__x_for_approximate_idxs",
         "__approximation_y_keys",
-        "__z_container_numba"
+        "__z_container_numba",
     ]
 
     def __init__(
@@ -952,7 +952,13 @@ class Spectroscopy:
             self.__drop_the_cols(x, y)
             pass
 
-    def load_data(self, raw_file: str, x_col_name:str = 'x_value', y_col_name:str = 'y_value', z_col_name:str = 'z_value'):
+    def load_data(
+        self,
+        raw_file: str,
+        x_col_name: str = "x_value",
+        y_col_name: str = "y_value",
+        z_col_name: str = "z_value",
+    ):
         """
         loads csv file to Spectroscopy class data structure. CSV file must contain three columns ['x_value', 'y_value', 'z_value']. Dtype of each value - Float | int
         :param raw_file: x value(s)
