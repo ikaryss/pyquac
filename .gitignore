@@ -140,6 +140,7 @@ cython_debug/
 
 # End of https://www.toptal.com/developers/gitignore/api/python.idea
 .idea/
+.fleet/
 
 #lock fle with current dependencies
 poetry.lock
@@ -148,6 +149,7 @@ poetry.lock
 
 # jupyter tests
 tech_tests.ipynb
+
 /home_tests
 /pyquac/ddd.csv
 /pyquac/jyp_app.ipynb
