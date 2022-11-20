@@ -7,17 +7,7 @@ import plotly.graph_objects as go
 from dash import dcc, callback
 
 
-# def figure_layout(data, cmap):
-#     def define_figure(data, cmap):
-#         fig = go.Figure(
-#             data=go.Heatmap(
-#                 z=data.iloc[:, 2], x=data.iloc[:, 0], y=data.iloc[:, 1], colorscale=cmap
-#             )
-#         )
-#         return fig
-
-#     figure = dcc.Graph(id="heatmap", figure=define_figure(data, cmap))
-#     return figure
+AXIS_SIZE = 13
 
 GRAPH_STYLE = {
     "position": "fixed",
@@ -39,18 +29,24 @@ GRAPH_HIDEN = {
     "top": "100px",
     "left": 0,
     "bottom": 0,
-    "width": "70rem",
+    "width": "45rem",
+    # "width": "70rem",
     "height": "37rem",
     # "z-index": 1,
     "overflow-x": "hidden",
     "transition": "all 0.5s",
-    "transition-delay": "500ms",
+    # "transition-delay": "500ms",
     # "transition-property": "margin-right",
     # "padding": "0.5rem 1rem",
 }
 
 
-def figure_layout(data):
+def figure_layout(
+    data,
+    x_axis_title: str = "Voltages, V",
+    y_axis_title: str = "Frequencies, GHz",
+    cmap: str = "rdylbu",
+):
     """constructor for heatmap layout
 
     Args:
@@ -59,9 +55,22 @@ def figure_layout(data):
 
     def define_figure(data):
         fig = go.Figure(
-            data=go.Heatmap(z=data.iloc[:, 2], x=data.iloc[:, 0], y=data.iloc[:, 1])
+            data=go.Heatmap(
+                z=data.iloc[:, 2], x=data.iloc[:, 0], y=data.iloc[:, 1], colorscale=cmap
+            )
         )
-        fig.update_layout()
+        fig.update_layout(
+            xaxis_title=x_axis_title,
+            yaxis_title=y_axis_title,
+            autosize=False,
+            separators=".",
+        )
+
+        fig.update_yaxes(title_font={"size": AXIS_SIZE}, tickfont_size=AXIS_SIZE)
+        fig.update_xaxes(title_font={"size": AXIS_SIZE}, tickfont_size=AXIS_SIZE)
+        fig.update_layout(yaxis=dict(showexponent="none", exponentformat="e"))
+        fig.update_traces(zhoverformat=".2f")
+        fig.update_layout(width=650, height=550)
         return fig
 
     figure = dcc.Graph(id="heatmap", figure=define_figure(data), style=GRAPH_STYLE)
