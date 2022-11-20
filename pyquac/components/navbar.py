@@ -13,6 +13,7 @@ import dash_bootstrap_components as dbc
 from pyquac.settings import settings
 
 APP_LOGO = settings.app_logo
+LOGO_HEIGHT = "42px" if APP_LOGO == settings.app_logo_pyquac else "35px"
 
 ########################## Navbar ##########################
 # Input
@@ -30,7 +31,7 @@ COLLAPSE = html.Div(
 LOGO = html.A(
     dbc.Row(
         [
-            dbc.Col(html.Img(src=APP_LOGO, height="35px")),
+            dbc.Col(html.Img(src=APP_LOGO, height=LOGO_HEIGHT)),
             dbc.Col(dbc.NavbarBrand(settings.app_name, className="ms-2")),
         ],
         align="start",
