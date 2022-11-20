@@ -56,20 +56,102 @@ CONTENT_STYLE1 = {
     "padding": "2rem 1rem",
 }
 
+# items
+items = [
+    dbc.DropdownMenuItem("First"),
+    dbc.DropdownMenuItem(divider=True),
+    dbc.DropdownMenuItem("Second"),
+]
+
 ########################## Sidebar ##########################
 sidebar = html.Div(
     [
         html.H5("Spectroscopy"),
+        html.P("control panel", className="summary"),
         html.Hr(),
-        html.P("A simple sidebar for data settings"),
         dbc.Nav(
             [
-                dbc.NavLink("btn 1", href="/", active="exact"),
-                dbc.NavLink("btn 2", href="/page-1", active="exact"),
-                dbc.NavLink("btn 3", href="/page-2", active="exact"),
+                dbc.DropdownMenu(
+                    label="Select data",
+                    children=items,
+                    direction="end",
+                    className="mt-2",
+                ),
             ],
             vertical=True,
             pills=True,
+        ),
+        html.Hr(),
+        dbc.Nav(
+            [
+                dbc.NavItem(html.P("Data saving"), class_name="mt-3"),
+                dbc.NavItem(
+                    dbc.ButtonGroup(
+                        [
+                            dbc.Button("CSV file", title="save current"),
+                            dbc.Button(class_name="fa fa-server", title="save all"),
+                        ],
+                        size="md",
+                        # className="my-3",
+                    )
+                ),
+                dbc.NavItem(
+                    dbc.ButtonGroup(
+                        [
+                            dbc.Button("raw CSV file", title="save current"),
+                            dbc.Button(class_name="fa fa-server", title="save all"),
+                        ],
+                        size="md",
+                        className="my-3",
+                    )
+                ),
+            ],
+            vertical=True,
+            pills=True,
+        ),
+        dbc.Nav(
+            [
+                dbc.NavItem(
+                    dbc.ButtonGroup(
+                        [
+                            dbc.Button("PDF file", title="save current"),
+                            dbc.Button(class_name="fa fa-server", title="save all"),
+                        ],
+                        size="md",
+                        # className="my-3",
+                    )
+                ),
+                dbc.NavItem(
+                    dbc.ButtonGroup(
+                        [
+                            dbc.Button("SVG file", title="save current"),
+                            dbc.Button(class_name="fa fa-server", title="save all"),
+                        ],
+                        size="md",
+                        className="my-3",
+                    )
+                ),
+                dbc.NavItem(
+                    dbc.ButtonGroup(
+                        [
+                            dbc.Button("HTML file", title="save current"),
+                            dbc.Button(class_name="fa fa-server", title="save all"),
+                        ],
+                        size="md",
+                        # className="my-3",
+                    )
+                ),
+            ],
+            vertical=True,
+            pills=True,
+        ),
+        html.Hr(),
+        dbc.Button(
+            class_name="fa fa-gear",
+            size="lg",
+            outline=True,
+            color="#f8f9fa",
+            title="project settings",
         ),
     ],
     id="sidebar",
