@@ -30,7 +30,12 @@ app.title = settings.app_name
 ########################## App Layout ##########################
 
 
-def conf_app(data):
+def conf_app(
+    data,
+    x_axis_title: str = "Voltages, V",
+    y_axis_title: str = "Frequencies, GHz",
+    cmap: str = "rdylbu",
+):
     def serve_layout():
         """Define the layout of the application
 
@@ -57,7 +62,9 @@ def conf_app(data):
                                 ),
                                 dbc.Row(
                                     children=[
-                                        figure_layout(data),
+                                        figure_layout(
+                                            data, x_axis_title, y_axis_title, cmap
+                                        ),
                                     ]
                                 ),
                             ]
