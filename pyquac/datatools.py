@@ -131,7 +131,7 @@ class Spectroscopy:
     Raises:
         AttributeError: _description_
     Returns:
-        _type_: _description_
+        spectroscopy data type: container for stored data
     """
 
     __slots__ = [
