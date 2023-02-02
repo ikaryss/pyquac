@@ -20,6 +20,14 @@ class Settings(BaseSettings):
     app_link: str = r"https://fmn.bmstu.ru/"
     app_linkedin_url: str = r"https://fmn.bmstu.ru/"
     app_github_url: str = r"https://github.com/ikaryss/pyquac"
+    transition_time: str = "all 0.1s"
+
+    # App settings
+    init_interval: int = 3000
+    init_max_interval: int = -1
+    init_x_label: str = "Voltages, V"
+    init_y_label: str = "Frequencies, GHz"
+    init_cmap: str = "rdylbu"
 
     class Config:
         """

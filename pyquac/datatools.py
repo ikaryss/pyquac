@@ -625,7 +625,9 @@ class Spectroscopy:
 
             return array_to_process
         else:
-            pass
+            array_to_process = np.zeros(len(self.x_list) * len(self.y_list))
+            array_to_process[:] = np.nan
+            return array_to_process
 
     def xyz_peak(
         self,

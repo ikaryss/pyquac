@@ -8,6 +8,7 @@ from dash.dependencies import Input, Output, State
 from dash import html
 from dash import callback
 import dash_bootstrap_components as dbc
+from pyquac.settings import settings
 
 # the style arguments for the sidebar. We use position:fixed and a fixed width
 SIDEBAR_STYLE = {
@@ -19,7 +20,7 @@ SIDEBAR_STYLE = {
     "height": "100%",
     "z-index": 1,
     "overflow-x": "hidden",
-    "transition": "all 0.5s",
+    "transition": settings.transition_time,
     # "transition-delay": "500ms",
     "padding": "0.5rem 1rem",
     "background-color": "#f8f9fa",
@@ -34,7 +35,7 @@ SIDEBAR_HIDEN = {
     "height": "100%",
     "z-index": 1,
     "overflow-x": "hidden",
-    "transition": "all 0.5s",
+    "transition": settings.transition_time,
     "padding": "0.5rem 1rem",
     "background-color": "#f8f9fa",
 }
