@@ -2,8 +2,9 @@
 This file is for creating a graph layout
 """
 
-from dash.dependencies import Input, Output
-from dash import dcc, callback
+from dash.dependencies import Input, Output, State, ClientsideFunction
+from dash import dcc, callback, clientside_callback, ctx
+from dash.exceptions import PreventUpdate
 import plotly.graph_objects as go
 from pyquac.settings import settings
 
@@ -11,13 +12,13 @@ AXIS_SIZE = 13
 
 GRAPH_STYLE = {
     "position": "fixed",
-    "top": "110px",
+    # "top": "90px",
     "left": "16rem",
-    "bottom": 0,
-    "width": "45rem",
-    "height": "37rem",
+    # "bottom": 0,
+    # "width": "45rem",
+    # "height": 500,
     # "z-index": 1,
-    "overflow-x": "hidden",
+    # "overflow-x": "hidden",
     "transition": settings.transition_time,
     # "transition-delay": "width 500ms",
     # "transition-property": "margin-right",
@@ -26,13 +27,13 @@ GRAPH_STYLE = {
 
 GRAPH_HIDEN = {
     "position": "fixed",
-    "top": "110px",
+    # "top": "90px",
     "left": 0,
-    "bottom": 0,
-    "right": 0,
+    # "bottom": 0,
+    # "right": 0,
     "width": "45rem",
     # "width": "70rem",
-    "height": "37rem",
+    "height": "50rem",
     # "z-index": 1,
     # "overflow-x": "hidden",
     "transition": settings.transition_time,
@@ -60,41 +61,34 @@ def define_figure(
     """
     fig = go.Figure(data=go.Heatmap(z=z, x=x, y=y, colorscale=cmap))
 
-    fig.update_layout(
-        xaxis_title=x_axis_title,
-        yaxis_title=y_axis_title,
-        autosize=False,
-        separators=".",
-    )
-
-    fig.update_yaxes(title_font={"size": AXIS_SIZE}, tickfont_size=AXIS_SIZE)
-    fig.update_xaxes(title_font={"size": AXIS_SIZE}, tickfont_size=AXIS_SIZE)
-    fig.update_layout(yaxis=dict(showexponent="none", exponentformat="e"))
-    fig.update_traces(zhoverformat=".2f")
-    fig.update_layout(width=650, height=550)
-    return fig
-
-
-def define_figure_extend(
-    z,
-    x,
-    y,
-    x_axis_title: str,
-    y_axis_title: str,
-    cmap: str,
-):
-    """sets figure layout
-
-    Args:
-        data (Spectroscopy): spectroscopy-like object
-
-    Returns:
-        go.gigure: plotly figure
-    """
-    fig = go.Figure(data=go.Heatmap(z=z, x=x, y=y, colorscale=cmap))
-
     fig.add_trace(go.Scatter(x=None, y=None, mode="lines", xaxis="x2"))
 
+    fig.add_trace(go.Scatter(x=None, y=None, mode="lines", yaxis="y2"))
+
+    fig.add_vline(
+        x=None,
+        visible=False,
+        line=dict(
+            color="Black",
+            width=2,
+            dash="dash",
+        ),
+        opacity=1.0,
+        name="vline",
+    )
+
+    fig.add_hline(
+        y=None,
+        visible=False,
+        line=dict(
+            color="Black",
+            width=2,
+            dash="dash",
+        ),
+        opacity=1.0,
+        name="hline",
+    )
+
     fig.update_layout(
         xaxis_title=x_axis_title,
         yaxis_title=y_axis_title,
@@ -104,19 +98,38 @@ def define_figure_extend(
 
     fig.update_layout(
         autosize=False,
-        xaxis=dict(zeroline=False, domain=[0, 0.60], showgrid=False),
-        # yaxis=dict(zeroline=False, domain=[0, 0.85], showgrid=False),
-        xaxis2=dict(zeroline=False, domain=[0.60, 1], showgrid=False),
-        # yaxis2=dict(zeroline=False, domain=[0.85, 1], showgrid=False),
+        xaxis=dict(zeroline=False, domain=[0, 0.72], showgrid=True),
+        yaxis=dict(zeroline=False, domain=[0, 0.72], showgrid=True),
+        xaxis2=dict(zeroline=False, domain=[0.76, 1], showgrid=True, visible=True),
+        yaxis2=dict(zeroline=False, domain=[0.76, 1], showgrid=True),
         bargap=0,
         hovermode="closest",
     )
+
+    fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
+    fig.update_traces(showlegend=False)
 
     fig.update_yaxes(title_font={"size": AXIS_SIZE}, tickfont_size=AXIS_SIZE)
     fig.update_xaxes(title_font={"size": AXIS_SIZE}, tickfont_size=AXIS_SIZE)
     fig.update_layout(yaxis=dict(showexponent="none", exponentformat="e"))
     # fig.update_traces(zhoverformat=".2f")
-    fig.update_layout(width=850, height=550)
+    fig.update_layout(height=600)
+    # https://plotly.com/python/hover-text-and-formatting/
+    fig.update_xaxes(
+        showspikes=True,
+        spikecolor="black",
+        spikethickness=2,
+        spikesnap="cursor",
+        spikemode="across",
+    )
+    fig.update_yaxes(
+        showspikes=True,
+        spikecolor="black",
+        spikethickness=2,
+        spikesnap="cursor",
+        spikemode="across",
+    )
+    fig.update_traces(hoverinfo="x+y+z", selector=dict(type="heatmap"))
     return fig
 
 
@@ -144,6 +157,10 @@ def figure_layout(
             y_axis_title=y_axis_title,
             cmap=cmap,
         ),
+        animate=False,
+        config={
+            "scrollZoom": False,
+        },
         style=GRAPH_STYLE,
     )
     return figure
@@ -151,17 +168,10 @@ def figure_layout(
 
 @callback(
     Output("heatmap", "style"),
-    Output("heatmap", "figure"),
     Input("btn_sidebar", "n_clicks"),
     Input("side_click", "data"),
-    Input("z_store", "data"),
-    Input("x_store", "data"),
-    Input("y_store", "data"),
-    Input("x_label", "data"),
-    Input("y_label", "data"),
-    Input("cmap", "data"),
 )
-def toggle_graph(n, nclick, z, x, y, x_label, y_label, cmap):
+def toggle_graph(n, nclick):
     """function to hide and reveal sidebar
 
     Args:
@@ -171,49 +181,119 @@ def toggle_graph(n, nclick, z, x, y, x_label, y_label, cmap):
     Returns:
         dict: style objects
     """
-    fig = define_figure(
-        z,
-        x,
-        y,
-        x_label,
-        y_label,
-        cmap,
-    )
     if n:
         if nclick == "SHOW":
             graph_style = GRAPH_STYLE
-            fig = define_figure(
-                z,
-                x,
-                y,
-                x_label,
-                y_label,
-                cmap,
-            )
         else:
             graph_style = GRAPH_HIDEN
-            fig = define_figure_extend(
-                z,
-                x,
-                y,
-                x_label,
-                y_label,
-                cmap,
-            )
     else:
         graph_style = GRAPH_STYLE
 
-    return graph_style, fig
+    return graph_style
 
 
 # @callback(
 #     Output("heatmap", "figure"),
 #     Input("interval-graph-update", "n_intervals"),
-#     Input("z_store", "data"),
+#     State("x_store", "data"),
+#     State("y_store", "data"),
+#     State("z_store", "data"),
 #     State("heatmap", "figure"),
+#     State("y_scatter", "data"),
+#     State("yz_scatter", "data"),
+#     State("x_scatter", "data"),
+#     State("xz_scatter", "data"),
+#     Input("x_click", "data"),
+#     Input("y_click", "data"),
+#     Input("heatmap", "clickData"),
+#     State("line-switches", "on"),
+#     Input("temp", "data")
+#     # Input("xy_lines_state", "data"),
 # )
-# def update_graph(i, z, fig):
-
+# def update_graph(
+#     i,
+#     x,
+#     y,
+#     z,
+#     fig,
+#     y_scatter,
+#     yz_scatter,
+#     x_scatter,
+#     xz_scatter,
+#     x_click,
+#     y_click,
+#     click,
+#     line_switch,
+#     # xy_state,
+#     temp,
+# ):
+#     triggered_id = ctx.triggered_id
 #     if i == 0:
 #         raise PreventUpdate
-#     return go.Figure(fig).update_traces(z=z)
+#     print(temp)
+#     # if triggered_id == "interval-graph-update":
+#     #     return go.Figure(fig).update_traces(x=x, y=y, z=z, selector={"type": "heatmap"})
+#     # elif (triggered_id == "heatmap") or (triggered_id == "x-slider"):
+#     #     return go.Figure(fig).update_traces(
+#     #         x=z_scatter, y=y_scatter, selector={"type": "scatter"}
+#     #     )
+
+#     if x_click is None:
+#         fig["layout"]["shapes"][0].update({"visible": False})
+#         fig["layout"]["shapes"][1].update({"visible": False})
+#     else:
+#         fig["layout"]["shapes"][0].update({"visible": line_switch})
+#         fig["layout"]["shapes"][1].update({"visible": line_switch})
+
+#     if triggered_id == "interval-graph-update":
+#         fig["data"][0].update({"x": x, "y": y, "z": z})
+#         return fig
+#     elif triggered_id == "heatmap":
+#         fig["data"][1].update({"x": yz_scatter, "y": y_scatter})
+#         fig["data"][2].update({"x": x_scatter, "y": xz_scatter})
+#         fig["layout"]["shapes"][0].update(
+#             {
+#                 "x0": x_click,
+#                 "x1": x_click,
+#                 # "visible": line_switch,
+#                 "y0": 0.05,
+#                 "y1": 0.95,
+#             }
+#         )
+#         fig["layout"]["shapes"][1].update({"y0": y_click, "y1": y_click})
+#         return fig
+
+
+clientside_callback(
+    ClientsideFunction(namespace="clientside", function_name="refresh_graph"),
+    Output("heatmap", "figure"),
+    Input("interval-graph-update", "n_intervals"),
+    Input("x_click", "data"),
+    Input("y_click", "data"),
+    Input("heatmap", "clickData"),
+    Input("modal_close", "n_clicks"),
+    State("x_store", "data"),
+    State("y_store", "data"),
+    State("z_store", "data"),
+    State("heatmap", "figure"),
+    State("y_scatter", "data"),
+    State("yz_scatter", "data"),
+    State("x_scatter", "data"),
+    State("xz_scatter", "data"),
+    State("line-switches", "on"),
+    State("x-title", "value"),
+    State("y-title", "value"),
+    prevent_initial_call=True,
+)
+
+# clientside_callback(
+#     """
+#     function(i) {
+#         const triggered_id = dash_clientside.callback_context.triggered.map(t => t.prop_id)[0];
+#         return triggered_id;
+#     }
+#     """,
+#     Output("temp", "data"),
+#     Input("modal_close", "n_clicks"),
+#     prevent_initial_call=True,
+# )

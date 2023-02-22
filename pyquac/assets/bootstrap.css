@@ -11098,3 +11098,25 @@ thead th {
 .modal-content {
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
 }
+
+.rc-slider-track {
+  background-color: #3459e6;
+}
+
+.rc-slider-dot-active {  
+  border-color: #3459e6;
+  /* border: solid 2px red; */
+}
+
+.rc-slider-handle {
+  background-color: #3459e6;
+  border-color: #3459e6;
+}
+
+.rc-slider-handle:hover {
+  border-color: #3459e6;
+}
+
+.rc-slider-handle-active:active {
+  border-color: #3459e6;
+}

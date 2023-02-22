@@ -2,4 +2,6 @@
 
 from .navbar import navbar
 from .sidebar import sidebar, content
-from .property_nav import property_nav
+from .modal import modal
+
+# from .property_nav import property_nav
