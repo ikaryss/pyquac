@@ -23,7 +23,6 @@ SIDEBAR_STYLE = {
     "z-index": 1,
     "overflow-x": "hidden",
     "transition": settings.transition_time,
-    # "transition-delay": "500ms",
     "padding": "0.5rem 1rem",
     "background-color": "#f8f9fa",
 }
@@ -60,129 +59,139 @@ CONTENT_STYLE1 = {
 }
 
 # items
-items = [
-    dbc.DropdownMenuItem("First"),
-    dbc.DropdownMenuItem(divider=True),
-    dbc.DropdownMenuItem("Second"),
-]
+BS_icon_data = html.I(className="fa-solid fa-database me-2")
+BS_button_data = dbc.Button(
+    [BS_icon_data, "choose data"], id="modal_db_open", class_name="me-2"
+)
 
 ########################## Sidebar ##########################
-def sidebar(data):
-    return html.Div(
-        [
-            html.H5("Spectroscopy"),
-            html.P("control panel", className="summary"),
-            # html.Hr(),
-            # dbc.Nav(
-            #     [
-            #         dbc.DropdownMenu(
-            #             label="Select data",
-            #             children=items,
-            #             direction="end",
-            #             className="mt-2",
-            #         ),
-            #     ],
-            #     vertical=True,
-            #     pills=True,
-            # ),
-            html.Hr(),
-            dbc.Nav(
-                [
-                    dbc.NavItem(
-                        [
-                            dbc.Row(
-                                [
-                                    dbc.Col(html.Div("heatmap updating"), width=8),
-                                    dbc.Col(
-                                        daq.BooleanSwitch(
-                                            id="interval-switches",
-                                            on=True,
-                                            color="#3459e6",
-                                        ),
-                                        width=4,
-                                    ),
-                                ]
-                            ),
-                        ],
-                        # style={"margin-left": "2rem"},
-                    ),
-                    dbc.NavItem(
-                        dbc.Input(
-                            id="update-interval-value",
-                            type="number",
-                            min=500,
-                            step=1,
-                            placeholder="Update graph in... ms",
-                            disabled=False,
-                            html_size=16,
-                            size="sm",
-                        ),
-                        # style={"margin-left": "1rem"},
-                    ),
-                    html.Hr(),
-                    dbc.NavItem(
+
+sidebar = html.Div(
+    [
+        html.H5("Spectroscopy"),
+        html.P("control panel", className="summary"),
+        dbc.Nav(
+            [
+                dbc.NavItem(BS_button_data),
+                html.Hr(),
+                dbc.NavItem(
+                    html.H6("Performance settings"),
+                    className="md-2",
+                    style={"margin-bottom": "0.5rem"},
+                ),
+                dbc.NavItem(
+                    [
                         dbc.Row(
                             [
-                                dbc.Col(html.Div("data saving", id="log")),
-                            ]
-                        )
-                    ),
-                    dbc.NavItem(
-                        dbc.ButtonGroup(
-                            [
-                                dbc.Button("csv", id="csv", title="save current CSV"),
-                                dbc.Button(
-                                    "stack csv",
-                                    id="raw csv",
-                                    title="save current stacked CSV",
+                                dbc.Col(
+                                    html.Div("heatmap updating", className="small"),
+                                    width=8,
                                 ),
-                                dbc.Button("pdf", id="pdf", title="save current PDF"),
-                                dbc.Button("svg", id="svg", title="save current SVG"),
-                                dbc.Button(
-                                    "html", id="html", title="save current HTML"
-                                ),
-                                # dbc.Button(class_name="fa fa-server", title="save all"),
-                            ],
-                            size="sm",
-                            # className="my-3",
-                            className="mt-2",
-                        )
-                    ),
-                    dbc.NavItem(
-                        [
-                            dbc.Row(
-                                [
-                                    dbc.Col(html.Div("show XY lines"), width=8),
-                                    dbc.Col(
-                                        daq.BooleanSwitch(
-                                            id="line-switches",
-                                            on=settings.init_xy_lines_state,
-                                            color="#3459e6",
-                                        ),
-                                        width=4,
+                                dbc.Col(
+                                    daq.BooleanSwitch(
+                                        id="interval-switches",
+                                        on=True,
+                                        color="#3459e6",
                                     ),
-                                ]
-                            ),
-                        ],
-                        class_name="mt-3",
+                                    width=4,
+                                ),
+                            ]
+                        ),
+                    ],
+                    style={"margin-bottom": "0.5rem"},
+                ),
+                dbc.NavItem(
+                    dbc.Input(
+                        id="update-interval-value",
+                        type="number",
+                        min=500,
+                        step=1,
+                        placeholder="Update graph in... ms",
+                        disabled=False,
+                        html_size=16,
+                        size="sm",
                     ),
-                ],
-                vertical=True,
-                pills=True,
-            ),
-            html.Hr(),
-            dbc.Button(
-                id="open_modal",
-                class_name="fa fa-gear",
-                size="lg",
-                outline=True,
-                color="#f8f9fa",
-                title="project settings",
-            ),
-        ],
-        id="sidebar",
-        style=SIDEBAR_STYLE,
-    )
+                    # style={"margin-left": "1rem"},
+                ),
+                html.Hr(),
+                dbc.NavItem(html.H6("Data saving"), className="md-2"),
+                dbc.NavItem(
+                    dbc.ButtonGroup(
+                        [
+                            dbc.Button("csv", id="csv", title="save current CSV"),
+                            dbc.Button(
+                                "stack csv",
+                                id="raw csv",
+                                title="save current stacked CSV",
+                            ),
+                            dbc.Button("pdf", id="pdf", title="save current PDF"),
+                            dbc.Button("svg", id="svg", title="save current SVG"),
+                            dbc.Button("html", id="html", title="save current HTML"),
+                        ],
+                        size="sm",
+                        # className="my-3",
+                        className="mt-2",
+                    )
+                ),
+                dbc.NavItem(
+                    [
+                        dbc.Row(
+                            [
+                                dbc.Col(
+                                    html.Div("save only heatmap", className="small"),
+                                    width=8,
+                                ),
+                                dbc.Col(
+                                    daq.BooleanSwitch(
+                                        id="fig-switches",
+                                        on=False,
+                                        color="#3459e6",
+                                    ),
+                                    width=4,
+                                ),
+                            ]
+                        ),
+                    ],
+                    class_name="mt-3",
+                ),
+                dbc.NavItem(
+                    [
+                        dbc.Row(
+                            [
+                                dbc.Col(
+                                    html.Div("show XY lines", className="small"),
+                                    width=8,
+                                ),
+                                dbc.Col(
+                                    daq.BooleanSwitch(
+                                        id="line-switches",
+                                        on=settings.init_xy_lines_state,
+                                        color="#3459e6",
+                                    ),
+                                    width=4,
+                                ),
+                            ]
+                        ),
+                    ],
+                    # class_name="mt-1",
+                ),
+            ],
+            vertical=True,
+            pills=True,
+        ),
+        html.Hr(),
+        dbc.Button(
+            id="open_modal",
+            class_name="fa fa-gear",
+            size="lg",
+            outline=True,
+            color="#f8f9fa",
+            title="project settings",
+        ),
+    ],
+    id="sidebar",
+    style=SIDEBAR_STYLE,
+)
 
 
 content = html.Div(id="page-content", style=CONTENT_STYLE)

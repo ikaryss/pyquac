@@ -4,30 +4,28 @@ This file is for housing the main dash application.
 This is where we define the various css items to fetch as well as the layout of our application.
 """
 
-from dash import dcc, callback, callback_context
+from dash import dcc, html, callback
+from dash.exceptions import PreventUpdate
 from dash.dependencies import Input, Output, State
-from dash import html, ctx
-import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
 from dash_bootstrap_templates import load_figure_template
 from jupyter_dash import JupyterDash
 
+import numpy as np
+
 from pyquac.settings import settings
+from pyquac.utils import initial_spectroscopy_in_app
 from pyquac.components.navbar import navbar
 from pyquac.components.sidebar import sidebar, content
 from pyquac.components.modal import modal
-
-# from pyquac.components.property_nav import property_nav
+from pyquac.components.modal_db import modal_db
 
 from pyquac.components.property_nav import property_nav
 from pyquac.components.heatmap import figure_layout
-from dash.exceptions import PreventUpdate
-
-import numpy as np
 
 # App Instance
 THEME = dbc.themes.ZEPHYR
-CSS = settings.css_url
+CSS = dbc.icons.FONT_AWESOME
 ICONS = dbc.icons.BOOTSTRAP
 load_figure_template("ZEPHYR")
 
@@ -51,27 +49,28 @@ STORE = {
 app = JupyterDash(__name__, external_stylesheets=[THEME, CSS, ICONS])
 app.title = settings.app_name
 
-
-def is_port_in_use(port: int) -> bool:
-    import socket
-
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        return s.connect_ex(("localhost", port)) == 0
-
-
 ########################## App Layout ##########################
 
 
-def conf_app(spectroscopy: dict, cmap: str = settings.init_cmap):
+def conf_app(spectroscopy, cmap: str = settings.init_cmap):
 
-    data = spectroscopy["data"]
-    qubit_id = spectroscopy["qubit_id"]
-    chip_id = spectroscopy["chip_id"]
-    spectroscopy_type = spectroscopy["type"].upper()
+    # Data configuration block
+    data_zoo, chip_zoo, qubit_zoo, type_zoo = initial_spectroscopy_in_app(spectroscopy)
 
-    if spectroscopy_type not in ["TTS", "STS"]:
-        raise AttributeError
+    if not isinstance(data_zoo, list):
+        data = data_zoo
+        chip = chip_zoo
+        qubit_toggle = qubit_zoo
+        spectroscopy_type = type_zoo
+        db_disabled = True
+    else:
+        data = data_zoo[0]
+        chip = chip_zoo[0]
+        qubit_toggle = qubit_zoo[0]
+        spectroscopy_type = type_zoo[0]
+        db_disabled = False
 
+    # Layout block
     def serve_layout():
         """Define the layout of the application
 
@@ -89,10 +88,25 @@ def conf_app(spectroscopy: dict, cmap: str = settings.init_cmap):
                 dcc.Store(id="y_store", data=data.y_1d, storage_type="session"),
                 dcc.Store(
                     id="save_attributes",
-                    data=[qubit_id, chip_id, spectroscopy_type],
+                    data=dict(
+                        qubit_toggle=qubit_toggle,
+                        chip=chip,
+                        spectroscopy_type=spectroscopy_type,
+                    ),
                     storage_type="session",
                 ),
                 dcc.Store(id="cmap", data=cmap, storage_type="session"),
+                dcc.Store(
+                    id="database",
+                    data=dict(
+                        db_disabled=db_disabled,
+                        chip=chip_zoo,
+                        qubit_toggle=qubit_zoo,
+                        type=type_zoo,
+                    ),
+                    # storage_type="session",
+                ),
+                dcc.Store(id="current_data", data=None),
                 dcc.Interval(
                     id="interval-graph-update",
                     interval=settings.init_interval,
@@ -108,7 +122,7 @@ def conf_app(spectroscopy: dict, cmap: str = settings.init_cmap):
                 dbc.Row(
                     [
                         dbc.Col(
-                            children=[sidebar(data), content, modal],
+                            children=[sidebar, content, modal, modal_db],
                             width=3,
                         ),
                         dbc.Col(
@@ -143,17 +157,27 @@ def conf_app(spectroscopy: dict, cmap: str = settings.init_cmap):
         Output("y_raw", "data"),
         Output("z_raw", "data"),
         Input("interval-graph-update", "n_intervals"),
-        # State("temp", "data"),
+        # Input("tbl", "active_cell")
+        Input("current_data", "data"),
     )
-    def update_fig_data(i):
-        # print(d)
+    def update_fig_data(i, active_cell):
+        if active_cell is None:
+            return (
+                data.x_1d,
+                data.y_1d,
+                data.njit_result,
+                data.x_raw,
+                data.y_raw,
+                data.z_raw,
+            )
+        current_data = data_zoo[active_cell]
         return (
-            data.x_1d,
-            data.y_1d,
-            data.njit_result,
-            data.x_raw,
-            data.y_raw,
-            data.z_raw,
+            current_data.x_1d,
+            current_data.y_1d,
+            current_data.njit_result,
+            current_data.x_raw,
+            current_data.y_raw,
+            current_data.z_raw,
         )
 
     @callback(

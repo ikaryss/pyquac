@@ -71,8 +71,6 @@ Dash app works directly in Jupyter Notebook
 
 <img src="docs/images/dash_example1.png" title="layout of Dash app" width="90%">  
 
-<img src="docs/images/dash_example2.png" title="layout of Dash app" width="90%">  
-
 ---
 Some spectroscopy measurements results  
  > single tone spectroscopy and two tone spectroscopy are shown  

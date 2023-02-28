@@ -3,8 +3,7 @@ This file is for creating a graph layout
 """
 
 from dash.dependencies import Input, Output, State, ClientsideFunction
-from dash import dcc, callback, clientside_callback, ctx
-from dash.exceptions import PreventUpdate
+from dash import dcc, callback, clientside_callback
 import plotly.graph_objects as go
 from pyquac.settings import settings
 
@@ -61,9 +60,11 @@ def define_figure(
     """
     fig = go.Figure(data=go.Heatmap(z=z, x=x, y=y, colorscale=cmap))
 
-    fig.add_trace(go.Scatter(x=None, y=None, mode="lines", xaxis="x2"))
+    fig.add_trace(go.Scatter(x=None, y=None, mode="lines", xaxis="x2", name="vertical"))
 
-    fig.add_trace(go.Scatter(x=None, y=None, mode="lines", yaxis="y2"))
+    fig.add_trace(
+        go.Scatter(x=None, y=None, mode="lines", yaxis="y2", name="horizontal")
+    )
 
     fig.add_vline(
         x=None,
@@ -133,6 +134,41 @@ def define_figure(
     return fig
 
 
+def define_figure_simple(
+    z,
+    x,
+    y,
+    x_axis_title: str,
+    y_axis_title: str,
+    cmap: str,
+):
+    """sets figure layout
+
+    Args:
+        data (Spectroscopy): spectroscopy-like object
+
+    Returns:
+        go.gigure: plotly figure
+    """
+    fig = go.Figure(data=go.Heatmap(z=z, x=x, y=y, colorscale=cmap))
+
+    fig.update_layout(
+        xaxis_title=x_axis_title,
+        yaxis_title=y_axis_title,
+        autosize=False,
+        separators=".",
+    )
+
+    fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
+
+    fig.update_yaxes(title_font={"size": AXIS_SIZE}, tickfont_size=AXIS_SIZE)
+    fig.update_xaxes(title_font={"size": AXIS_SIZE}, tickfont_size=AXIS_SIZE)
+    fig.update_layout(yaxis=dict(showexponent="none", exponentformat="e"))
+    fig.update_traces(zhoverformat=".2f")
+    fig.update_layout(height=700, width=700)
+    return fig
+
+
 def figure_layout(
     data,
     x_axis_title: str,
@@ -192,78 +228,6 @@ def toggle_graph(n, nclick):
     return graph_style
 
 
-# @callback(
-#     Output("heatmap", "figure"),
-#     Input("interval-graph-update", "n_intervals"),
-#     State("x_store", "data"),
-#     State("y_store", "data"),
-#     State("z_store", "data"),
-#     State("heatmap", "figure"),
-#     State("y_scatter", "data"),
-#     State("yz_scatter", "data"),
-#     State("x_scatter", "data"),
-#     State("xz_scatter", "data"),
-#     Input("x_click", "data"),
-#     Input("y_click", "data"),
-#     Input("heatmap", "clickData"),
-#     State("line-switches", "on"),
-#     Input("temp", "data")
-#     # Input("xy_lines_state", "data"),
-# )
-# def update_graph(
-#     i,
-#     x,
-#     y,
-#     z,
-#     fig,
-#     y_scatter,
-#     yz_scatter,
-#     x_scatter,
-#     xz_scatter,
-#     x_click,
-#     y_click,
-#     click,
-#     line_switch,
-#     # xy_state,
-#     temp,
-# ):
-#     triggered_id = ctx.triggered_id
-#     if i == 0:
-#         raise PreventUpdate
-#     print(temp)
-#     # if triggered_id == "interval-graph-update":
-#     #     return go.Figure(fig).update_traces(x=x, y=y, z=z, selector={"type": "heatmap"})
-#     # elif (triggered_id == "heatmap") or (triggered_id == "x-slider"):
-#     #     return go.Figure(fig).update_traces(
-#     #         x=z_scatter, y=y_scatter, selector={"type": "scatter"}
-#     #     )
-
-#     if x_click is None:
-#         fig["layout"]["shapes"][0].update({"visible": False})
-#         fig["layout"]["shapes"][1].update({"visible": False})
-#     else:
-#         fig["layout"]["shapes"][0].update({"visible": line_switch})
-#         fig["layout"]["shapes"][1].update({"visible": line_switch})
-
-#     if triggered_id == "interval-graph-update":
-#         fig["data"][0].update({"x": x, "y": y, "z": z})
-#         return fig
-#     elif triggered_id == "heatmap":
-#         fig["data"][1].update({"x": yz_scatter, "y": y_scatter})
-#         fig["data"][2].update({"x": x_scatter, "y": xz_scatter})
-#         fig["layout"]["shapes"][0].update(
-#             {
-#                 "x0": x_click,
-#                 "x1": x_click,
-#                 # "visible": line_switch,
-#                 "y0": 0.05,
-#                 "y1": 0.95,
-#             }
-#         )
-#         fig["layout"]["shapes"][1].update({"y0": y_click, "y1": y_click})
-#         return fig
-
-
 clientside_callback(
     ClientsideFunction(namespace="clientside", function_name="refresh_graph"),
     Output("heatmap", "figure"),
@@ -272,6 +236,7 @@ clientside_callback(
     Input("y_click", "data"),
     Input("heatmap", "clickData"),
     Input("modal_close", "n_clicks"),
+    Input("modal_db_close", "n_clicks"),
     State("x_store", "data"),
     State("y_store", "data"),
     State("z_store", "data"),

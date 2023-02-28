@@ -6,6 +6,7 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
       y_click,
       click,
       close_modal,
+      close_modal_db,
       x,
       y,
       z,
@@ -55,6 +56,26 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
       if (triggered_id === "modal_close.n_clicks") {
         figure["layout"]["xaxis"]["title"]["text"] = x_title;
         figure["layout"]["yaxis"]["title"]["text"] = y_title;
+      }
+      if (triggered_id === "modal_db_close.n_clicks") {
+        figure["layout"]["shapes"][0]["visible"] = false;
+        figure["layout"]["shapes"][1]["visible"] = false;
+
+        figure["layout"]["shapes"][0]["x0"] = undefined;
+        figure["layout"]["shapes"][0]["x1"] = undefined;
+
+        figure["layout"]["shapes"][1]["y0"] = undefined;
+        figure["layout"]["shapes"][1]["y1"] = undefined;
+
+        figure["data"][1]["x"] = undefined;
+        figure["data"][1]["y"] = undefined;
+
+        figure["data"][2]["x"] = undefined;
+        figure["data"][2]["y"] = undefined;
+
+        figure["data"][0]["x"] = x;
+        figure["data"][0]["y"] = y;
+        figure["data"][0]["z"] = z;
       }
       return figure;
     },

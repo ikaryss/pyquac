@@ -5,17 +5,19 @@
 # # https://dash-bootstrap-components.opensource.faculty.ai/docs/components/nav/
 # # """
 
-import pandas as pd
-import numpy as np
 import os
 from datetime import date, datetime
+import pandas as pd
+import numpy as np
 
 from dash.dependencies import Input, Output, State
-from dash import callback, html, ctx
-import plotly.graph_objects as go
+from dash import callback, ctx
 from dash.exceptions import PreventUpdate
+import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
+
 from pyquac.settings import settings
+from pyquac.components.heatmap import define_figure_simple
 
 
 def _get_result_(x, y, z):
@@ -79,10 +81,6 @@ PROPERTY_NAV_STYLE = {
     "position": "fixed",
     "top": "60px",
     "left": "16rem",
-    # "bottom": 0,
-    # "width": "16rem",
-    # "height": "100%",
-    # "z-index": "zIndex",
     "overflow-x": "hidden",
     "transition": settings.transition_time,
     "padding": "0.5rem 1rem",
@@ -92,17 +90,12 @@ PROPERTY_NAV_HIDEN = {
     "position": "fixed",
     "top": "60px",
     "left": 0,
-    # "bottom": 0,
-    # "width": "16rem",
-    # "height": "100%",
-    # "z-index": "zIndex",
     "overflow-x": "hidden",
     "transition": settings.transition_time,
     "padding": "0.5rem 1rem",
 }
 property_nav = dbc.Nav(
     [
-        # dbc.NavItem(dbc.Label("Status")),
         dbc.Alert(
             "App is now running",
             color="light",
@@ -136,6 +129,10 @@ property_nav = dbc.Nav(
     State("y_store", "data"),
     State("z_store", "data"),
     State("heatmap", "figure"),
+    State("cmap", "data"),
+    State("x-title", "value"),
+    State("y-title", "value"),
+    State("fig-switches", "on"),
 )
 def save_func(
     _,
@@ -155,12 +152,16 @@ def save_func(
     y_result,
     z_result,
     fig,
+    cmap,
+    x_title,
+    y_title,
+    fig_switch,
 ):
     button_clicked = ctx.triggered_id
     qubit_id, chip_id, spectroscopy_type = (
-        save_attributes[0],
-        save_attributes[1],
-        save_attributes[2],
+        save_attributes["qubit_toggle"],
+        save_attributes["chip"],
+        save_attributes["spectroscopy_type"],
     )
     filename = _file_name_(qubit_id, datetime.now().strftime("_%H-%M-%S"))
     path = _save_path_(filename, chip_id, default_path, spectroscopy_type)
@@ -176,15 +177,45 @@ def save_func(
         return f"current data saved to {path}_stacked.csv", True
 
     elif button_clicked == "pdf":
-        go.Figure(fig).write_image(f"{path}.pdf")
+        if fig_switch is True:
+            define_figure_simple(
+                x=x_result,
+                y=y_result,
+                z=z_result,
+                x_axis_title=x_title,
+                y_axis_title=y_title,
+                cmap=cmap,
+            ).write_image(f"{path}.pdf")
+        else:
+            go.Figure(fig).write_image(f"{path}.pdf")
         return f"current data saved to {path}.pdf", True
 
     elif button_clicked == "svg":
-        go.Figure(fig).write_image(f"{path}.svg")
+        if fig_switch is True:
+            define_figure_simple(
+                x=x_result,
+                y=y_result,
+                z=z_result,
+                x_axis_title=x_title,
+                y_axis_title=y_title,
+                cmap=cmap,
+            ).write_image(f"{path}.svg")
+        else:
+            go.Figure(fig).write_image(f"{path}.svg")
         return f"current data saved to {path}.svg", True
 
     elif button_clicked == "html":
-        go.Figure(fig).write_html(f"{path}.html")
+        if fig_switch is True:
+            define_figure_simple(
+                x=x_result,
+                y=y_result,
+                z=z_result,
+                x_axis_title=x_title,
+                y_axis_title=y_title,
+                cmap=cmap,
+            ).write_html(f"{path}.html")
+        else:
+            go.Figure(fig).write_html(f"{path}.html")
         return f"current data saved to {path}.html", True
 
     elif button_clicked == "heatmap":
@@ -224,38 +255,3 @@ def toggle_nav(n, nclick):
         nav_style = PROPERTY_NAV_STYLE
 
     return nav_style
-
-
-# # @callback(
-# #     Output("interval-graph-update", "max_intervals"), Input("interval-switches", "on")
-# # )
-# # def toggle_checklist(switch_state):
-# #     """function to change max interval property
-
-# #     Args:
-# #         n (_type_): _description_
-# #         max_interval (_type_): _description_
-
-# #     Returns:
-# #         _type_: _description_
-# #     """
-
-# #     if switch_state is True:
-# #         new_max_interval = -1
-# #         print("I will update")
-# #     else:
-# #         new_max_interval = 0
-# #         print("I stop updating")
-# #     return new_max_interval
-
-
-# # @callback(
-# #     Output("interval-graph-update", "interval"), Input("update-interval-value", "value")
-# # )
-# # def change_interval_update(new_interval):
-
-# #     if new_interval is not None:
-# #         print(f"HEY! now I update in {new_interval} ms")
-# #         return new_interval
-# #     else:
-# #         raise PreventUpdate

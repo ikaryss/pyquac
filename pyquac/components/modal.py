@@ -1,9 +1,12 @@
+# notes
+"""
+This file is for creating a modal pop-up object that contains 
+basic settings for graph component as well as for saving properties 
+"""
+
 from dash.dependencies import Input, Output, State
-from dash import html, dcc
-from dash.exceptions import PreventUpdate
-from dash import callback
+from dash import html, callback
 import dash_bootstrap_components as dbc
-import dash_daq as daq
 from pyquac.settings import settings
 
 tooltip = html.Div(

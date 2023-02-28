@@ -1,5 +1,4 @@
 from typing import List
-
 from pydantic import BaseSettings
 
 
@@ -10,7 +9,7 @@ class Settings(BaseSettings):
 
     # Dash/Plotly
     debug: bool = True
-    css_url: str = r"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    # css_url: str = r"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
     app_name: str = "fmn | pyquac"
     app_logo: str = r"/assets/logo_sign.png"
     app_logo_url: str = (
@@ -33,6 +32,11 @@ class Settings(BaseSettings):
 
     # Saving settings
     default_root_path: str = r"D:/Scripts/Measurement_automation/data/qubits/"
+    data_column: str = "data"
+    chip_column: str = "chip"
+    qubit_column: str = "qubit_toggle"
+    spectroscopy_type_column = "type"
+    allowed_types = ["TTS", "STS"]  # must be upper case!!
 
     class Config:
         """
