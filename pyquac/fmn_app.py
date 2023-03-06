@@ -53,6 +53,22 @@ app.title = settings.app_name
 
 
 def conf_app(spectroscopy, cmap: str = settings.init_cmap):
+    """configurate layout and dependencies for plotly dash app
+
+    Args:
+        spectroscopy (dict | list of dicts): each dict contains following keys:\n
+        data - contains Spectroscopy instance\n
+        chip - contains chip id or name\n
+        qubit_toggle - contains name of qubit interaction (for instance: "q1" or "q1_q2_sweep")\n
+        type - Spectroscopy type "TTS" or "STS"\n
+        cmap (str, optional): color map for heatmap graph. Defaults to {settings.init_cmap}.
+
+    Raises:
+        PreventUpdate: if dict instance doesn't match the rules
+
+    Returns:
+        Dash app: ready to go plotly Jupyter dash application
+    """
 
     # Data configuration block
     data_zoo, chip_zoo, qubit_zoo, type_zoo = initial_spectroscopy_in_app(spectroscopy)
