@@ -151,14 +151,12 @@ poetry.lock
 tech_tests.ipynb
 
 /home_tests
-/pyquac/ddd.csv
-/pyquac/jyp_app.ipynb
 /.vscode
-/pyquac/good_case.csv
-/pyquac/very_good.csv
 /pyquac/research.ipynb
 /examples/style.css
-/pyquac/random_example.py
-/pyquac/example_data.csv
-/pyquac/raw_test.csv
-/pyquac/delete.csv
+/pyquac/tts_noisy.csv
+/pyquac/tts_fit.csv
+/pyquac/sts_default.csv
+/pyquac/Showcase.ipynb
+/pyquac/app_error_test.py
+/pyquac/maindash.py

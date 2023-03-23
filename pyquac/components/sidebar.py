@@ -7,7 +7,6 @@ https://dash-bootstrap-components.opensource.faculty.ai/examples/simple-sidebar/
 from dash.dependencies import Input, Output, State
 from dash import html
 from dash.exceptions import PreventUpdate
-from dash import callback
 import dash_bootstrap_components as dbc
 import dash_daq as daq
 from pyquac.settings import settings
@@ -197,84 +196,84 @@ sidebar = html.Div(
 content = html.Div(id="page-content", style=CONTENT_STYLE)
 
 
-@callback(
-    Output("sidebar", "style"),
-    Output("page-content", "style"),
-    Output("side_click", "data"),
-    Input("btn_sidebar", "n_clicks"),
-    State("side_click", "data"),
-)
-def toggle_sidebar(n, nclick):
-    """function to hide and reveal sidebar
+# @app.callback(
+#     Output("sidebar", "style"),
+#     Output("page-content", "style"),
+#     Output("side_click", "data"),
+#     Input("btn_sidebar", "n_clicks"),
+#     State("side_click", "data"),
+# )
+# def toggle_sidebar(n, nclick):
+#     """function to hide and reveal sidebar
 
-    Args:
-        n (int): _description_
-        nclick (int): _description_
+#     Args:
+#         n (int): _description_
+#         nclick (int): _description_
 
-    Returns:
-        dict: style objects
-    """
-    if n:
-        if nclick == "SHOW":
-            sidebar_style = SIDEBAR_HIDEN
-            content_style = CONTENT_STYLE1
-            cur_nclick = "HIDDEN"
-        else:
-            sidebar_style = SIDEBAR_STYLE
-            content_style = CONTENT_STYLE
-            cur_nclick = "SHOW"
-    else:
-        sidebar_style = SIDEBAR_STYLE
-        content_style = CONTENT_STYLE
-        cur_nclick = "SHOW"
+#     Returns:
+#         dict: style objects
+#     """
+#     if n:
+#         if nclick == "SHOW":
+#             sidebar_style = SIDEBAR_HIDEN
+#             content_style = CONTENT_STYLE1
+#             cur_nclick = "HIDDEN"
+#         else:
+#             sidebar_style = SIDEBAR_STYLE
+#             content_style = CONTENT_STYLE
+#             cur_nclick = "SHOW"
+#     else:
+#         sidebar_style = SIDEBAR_STYLE
+#         content_style = CONTENT_STYLE
+#         cur_nclick = "SHOW"
 
-    return sidebar_style, content_style, cur_nclick
-
-
-@callback(
-    Output("interval-graph-update", "max_intervals"),
-    Output("line-switches", "disabled"),
-    Input("interval-switches", "on"),
-)
-def toggle_checklist(switch_state):
-    """function to change max interval property
-
-    Args:
-        n (_type_): _description_
-        max_interval (_type_): _description_
-
-    Returns:
-        _type_: _description_
-    """
-
-    if switch_state is True:
-        new_max_interval = -1
-        disabled = False
-    else:
-        new_max_interval = 0
-        disabled = True
-    return new_max_interval, disabled
+#     return sidebar_style, content_style, cur_nclick
 
 
-@callback(
-    Output("interval-graph-update", "interval"), Input("update-interval-value", "value")
-)
-def change_interval_update(new_interval):
+# @app.callback(
+#     Output("interval-graph-update", "max_intervals"),
+#     Output("line-switches", "disabled"),
+#     Input("interval-switches", "on"),
+# )
+# def toggle_checklist(switch_state):
+#     """function to change max interval property
 
-    if new_interval is not None:
-        return new_interval
-    else:
-        raise PreventUpdate
+#     Args:
+#         n (_type_): _description_
+#         max_interval (_type_): _description_
+
+#     Returns:
+#         _type_: _description_
+#     """
+
+#     if switch_state is True:
+#         new_max_interval = -1
+#         disabled = False
+#     else:
+#         new_max_interval = 0
+#         disabled = True
+#     return new_max_interval, disabled
 
 
-@callback(
-    Output("xy_lines_state", "data"),
-    Input("line-switches", "on"),
-)
-def toggle_xy_lines(switch_state):
+# @app.callback(
+#     Output("interval-graph-update", "interval"), Input("update-interval-value", "value")
+# )
+# def change_interval_update(new_interval):
 
-    if switch_state is True:
-        new_xy_state = True
-    else:
-        new_xy_state = False
-    return new_xy_state
+#     if new_interval is not None:
+#         return new_interval
+#     else:
+#         raise PreventUpdate
+
+
+# @app.callback(
+#     Output("xy_lines_state", "data"),
+#     Input("line-switches", "on"),
+# )
+# def toggle_xy_lines(switch_state):
+
+#     if switch_state is True:
+#         new_xy_state = True
+#     else:
+#         new_xy_state = False
+#     return new_xy_state

@@ -11,7 +11,7 @@ import pandas as pd
 import numpy as np
 
 from dash.dependencies import Input, Output, State
-from dash import callback, ctx
+from dash import ctx
 from dash.exceptions import PreventUpdate
 import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
@@ -109,149 +109,149 @@ property_nav = dbc.Nav(
 )
 
 
-@callback(
-    Output("status-alert", "children"),
-    Output("status-alert", "is_open"),
-    Input("csv", "n_clicks"),
-    Input("raw csv", "n_clicks"),
-    Input("pdf", "n_clicks"),
-    Input("svg", "n_clicks"),
-    Input("html", "n_clicks"),
-    Input("heatmap", "clickData"),
-    Input("x_click", "data"),
-    Input("y_click", "data"),
-    Input("interval-switches", "on"),
-    Input("update-interval-value", "value"),
-    Input("default-path", "value"),
-    State("save_attributes", "data"),
-    State("status-alert", "is_open"),
-    State("x_store", "data"),
-    State("y_store", "data"),
-    State("z_store", "data"),
-    State("heatmap", "figure"),
-    State("cmap", "data"),
-    State("x-title", "value"),
-    State("y-title", "value"),
-    State("fig-switches", "on"),
-)
-def save_func(
-    _,
-    __,
-    ___,
-    ____,
-    _____,
-    click,
-    x_click,
-    y_click,
-    on,
-    new_interval,
-    default_path,
-    save_attributes,
-    is_open,
-    x_result,
-    y_result,
-    z_result,
-    fig,
-    cmap,
-    x_title,
-    y_title,
-    fig_switch,
-):
-    button_clicked = ctx.triggered_id
-    qubit_id, chip_id, spectroscopy_type = (
-        save_attributes["qubit_toggle"],
-        save_attributes["chip"],
-        save_attributes["spectroscopy_type"],
-    )
-    filename = _file_name_(qubit_id, datetime.now().strftime("_%H-%M-%S"))
-    path = _save_path_(filename, chip_id, default_path, spectroscopy_type)
+# @app.callback(
+#     Output("status-alert", "children"),
+#     Output("status-alert", "is_open"),
+#     Input("csv", "n_clicks"),
+#     Input("raw csv", "n_clicks"),
+#     Input("pdf", "n_clicks"),
+#     Input("svg", "n_clicks"),
+#     Input("html", "n_clicks"),
+#     Input("heatmap", "clickData"),
+#     Input("x_click", "data"),
+#     Input("y_click", "data"),
+#     Input("interval-switches", "on"),
+#     Input("update-interval-value", "value"),
+#     Input("default-path", "value"),
+#     State("save_attributes", "data"),
+#     State("status-alert", "is_open"),
+#     State("x_store", "data"),
+#     State("y_store", "data"),
+#     State("z_store", "data"),
+#     State("heatmap", "figure"),
+#     State("cmap", "data"),
+#     State("x-title", "value"),
+#     State("y-title", "value"),
+#     State("fig-switches", "on"),
+# )
+# def save_func(
+#     _,
+#     __,
+#     ___,
+#     ____,
+#     _____,
+#     click,
+#     x_click,
+#     y_click,
+#     on,
+#     new_interval,
+#     default_path,
+#     save_attributes,
+#     is_open,
+#     x_result,
+#     y_result,
+#     z_result,
+#     fig,
+#     cmap,
+#     x_title,
+#     y_title,
+#     fig_switch,
+# ):
+#     button_clicked = ctx.triggered_id
+#     qubit_id, chip_id, spectroscopy_type = (
+#         save_attributes["qubit_toggle"],
+#         save_attributes["chip"],
+#         save_attributes["spectroscopy_type"],
+#     )
+#     filename = _file_name_(qubit_id, datetime.now().strftime("_%H-%M-%S"))
+#     path = _save_path_(filename, chip_id, default_path, spectroscopy_type)
 
-    if button_clicked == "csv":
-        _get_result_(x=x_result, y=y_result, z=z_result).to_csv(f"{path}.csv")
-        return f"current data saved to {path}.csv", True
+#     if button_clicked == "csv":
+#         _get_result_(x=x_result, y=y_result, z=z_result).to_csv(f"{path}.csv")
+#         return f"current data saved to {path}.csv", True
 
-    elif button_clicked == "raw csv":
-        _get_raw_result_(_get_result_(x=x_result, y=y_result, z=z_result)).to_csv(
-            f"{path}_stacked.csv"
-        )
-        return f"current data saved to {path}_stacked.csv", True
+#     elif button_clicked == "raw csv":
+#         _get_raw_result_(_get_result_(x=x_result, y=y_result, z=z_result)).to_csv(
+#             f"{path}_stacked.csv"
+#         )
+#         return f"current data saved to {path}_stacked.csv", True
 
-    elif button_clicked == "pdf":
-        if fig_switch is True:
-            define_figure_simple(
-                x=x_result,
-                y=y_result,
-                z=z_result,
-                x_axis_title=x_title,
-                y_axis_title=y_title,
-                cmap=cmap,
-            ).write_image(f"{path}.pdf")
-        else:
-            go.Figure(fig).write_image(f"{path}.pdf")
-        return f"current data saved to {path}.pdf", True
+#     elif button_clicked == "pdf":
+#         if fig_switch is True:
+#             define_figure_simple(
+#                 x=x_result,
+#                 y=y_result,
+#                 z=z_result,
+#                 x_axis_title=x_title,
+#                 y_axis_title=y_title,
+#                 cmap=cmap,
+#             ).write_image(f"{path}.pdf")
+#         else:
+#             go.Figure(fig).write_image(f"{path}.pdf")
+#         return f"current data saved to {path}.pdf", True
 
-    elif button_clicked == "svg":
-        if fig_switch is True:
-            define_figure_simple(
-                x=x_result,
-                y=y_result,
-                z=z_result,
-                x_axis_title=x_title,
-                y_axis_title=y_title,
-                cmap=cmap,
-            ).write_image(f"{path}.svg")
-        else:
-            go.Figure(fig).write_image(f"{path}.svg")
-        return f"current data saved to {path}.svg", True
+#     elif button_clicked == "svg":
+#         if fig_switch is True:
+#             define_figure_simple(
+#                 x=x_result,
+#                 y=y_result,
+#                 z=z_result,
+#                 x_axis_title=x_title,
+#                 y_axis_title=y_title,
+#                 cmap=cmap,
+#             ).write_image(f"{path}.svg")
+#         else:
+#             go.Figure(fig).write_image(f"{path}.svg")
+#         return f"current data saved to {path}.svg", True
 
-    elif button_clicked == "html":
-        if fig_switch is True:
-            define_figure_simple(
-                x=x_result,
-                y=y_result,
-                z=z_result,
-                x_axis_title=x_title,
-                y_axis_title=y_title,
-                cmap=cmap,
-            ).write_html(f"{path}.html")
-        else:
-            go.Figure(fig).write_html(f"{path}.html")
-        return f"current data saved to {path}.html", True
+#     elif button_clicked == "html":
+#         if fig_switch is True:
+#             define_figure_simple(
+#                 x=x_result,
+#                 y=y_result,
+#                 z=z_result,
+#                 x_axis_title=x_title,
+#                 y_axis_title=y_title,
+#                 cmap=cmap,
+#             ).write_html(f"{path}.html")
+#         else:
+#             go.Figure(fig).write_html(f"{path}.html")
+#         return f"current data saved to {path}.html", True
 
-    elif button_clicked == "heatmap":
-        return f"clicked on x: {x_click}\ty: {y_click}", True
+#     elif button_clicked == "heatmap":
+#         return f"clicked on x: {x_click}\ty: {y_click}", True
 
-    elif button_clicked == "interval-switches":
-        return f"Graph update is {on}", True
+#     elif button_clicked == "interval-switches":
+#         return f"Graph update is {on}", True
 
-    elif button_clicked == "update-interval-value":
-        return f"New update interval is {new_interval} ms.", True
+#     elif button_clicked == "update-interval-value":
+#         return f"New update interval is {new_interval} ms.", True
 
-    else:
-        raise PreventUpdate
+#     else:
+#         raise PreventUpdate
 
 
-@callback(
-    Output("property-nav", "style"),
-    Input("btn_sidebar", "n_clicks"),
-    Input("side_click", "data"),
-)
-def toggle_nav(n, nclick):
-    """function to hide and reveal sidebar
+# @app.callback(
+#     Output("property-nav", "style"),
+#     Input("btn_sidebar", "n_clicks"),
+#     Input("side_click", "data"),
+# )
+# def toggle_nav(n, nclick):
+#     """function to hide and reveal sidebar
 
-    Args:
-        n (int): _description_
-        nclick (int): _description_
+#     Args:
+#         n (int): _description_
+#         nclick (int): _description_
 
-    Returns:
-        dict: style objects
-    """
-    if n:
-        if nclick == "SHOW":
-            nav_style = PROPERTY_NAV_STYLE
-        else:
-            nav_style = PROPERTY_NAV_HIDEN
-    else:
-        nav_style = PROPERTY_NAV_STYLE
+#     Returns:
+#         dict: style objects
+#     """
+#     if n:
+#         if nclick == "SHOW":
+#             nav_style = PROPERTY_NAV_STYLE
+#         else:
+#             nav_style = PROPERTY_NAV_HIDEN
+#     else:
+#         nav_style = PROPERTY_NAV_STYLE
 
-    return nav_style
+#     return nav_style

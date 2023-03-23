@@ -7,7 +7,6 @@ https://dash-bootstrap-components.opensource.faculty.ai/docs/components/navbar/
 
 from dash.dependencies import Input, Output
 from dash import html
-from dash import callback
 import dash_bootstrap_components as dbc
 
 from pyquac.settings import settings
@@ -81,24 +80,24 @@ navbar = dbc.Navbar(
 )
 
 # Callback
-@callback(
-    Output(component_id="about", component_property="is_open"),
-    Output(component_id="about-popover", component_property="active"),
-    Input(component_id="about-popover", component_property="n_clicks"),
-    Input("about", "is_open"),
-    Input("about-popover", "active"),
-)
-def about_popover(n, is_open, active):
-    """toggle about popover
+# @app.callback(
+#     Output(component_id="about", component_property="is_open"),
+#     Output(component_id="about-popover", component_property="active"),
+#     Input(component_id="about-popover", component_property="n_clicks"),
+#     Input("about", "is_open"),
+#     Input("about-popover", "active"),
+# )
+# def about_popover(n, is_open, active):
+#     """toggle about popover
 
-    Args:
-        n (int): number of clicks
-        is_open (bool): current state
-        active (bool): _description_
+#     Args:
+#         n (int): number of clicks
+#         is_open (bool): current state
+#         active (bool): _description_
 
-    Returns:
-        tuple(bool): status flip
-    """
-    if n:
-        return not is_open, active
-    return is_open, active
+#     Returns:
+#         tuple(bool): status flip
+#     """
+#     if n:
+#         return not is_open, active
+#     return is_open, active

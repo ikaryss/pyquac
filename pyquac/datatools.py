@@ -86,8 +86,8 @@ def _complicated(
     y_ind: int = 0
     if len(ind_array) >= 2:
         for k in range(len(raw_array_x)):
-            x_ind = (raw_array_x[k] - x_min_) // x_step_
-            y_ind = (raw_array_y[k] - y_min_) // y_step_
+            x_ind = np.rint((raw_array_x[k] - x_min_) / x_step_)
+            y_ind = np.rint((raw_array_y[k] - y_min_) / y_step_)
 
             ind_array[k] = x_ind * len_y_ + y_ind
             pass
@@ -620,8 +620,8 @@ class Spectroscopy:
 
         for i in range(len(self.x_raw)):
             self.__z_2d[
-                int((self.__y_container[i] - self.y_min) // self.y_step),
-                int((self.__x_container[i] - self.x_min) // self.x_step),
+                np.rint((self.__y_container[i] - self.y_min) / self.y_step),
+                np.rint((self.__x_container[i] - self.x_min) / self.x_step),
             ] = self.__z_container[i]
 
         z_1d = self.__z_2d.ravel(order="F")
@@ -669,8 +669,8 @@ class Spectroscopy:
 
             for i in range(len(z_val)):
                 self.__z_2d[
-                    int((y_val[i] - self.y_min) // self.y_step),
-                    int((x_val[i] - self.x_min) // self.x_step),
+                    np.rint((y_val[i] - self.y_min) / self.y_step),
+                    np.rint((x_val[i] - self.x_min) / self.x_step),
                 ] = z_val[i]
 
             return self.__z_2d

@@ -5,7 +5,7 @@ basic settings for graph component as well as for saving properties
 """
 
 from dash.dependencies import Input, Output, State
-from dash import html, callback
+from dash import html
 import dash_bootstrap_components as dbc
 from pyquac.settings import settings
 
@@ -94,12 +94,12 @@ modal = dbc.Modal(
 )
 
 
-@callback(
-    Output("modal", "is_open"),
-    [Input("open_modal", "n_clicks"), Input("modal_close", "n_clicks")],
-    [State("modal", "is_open")],
-)
-def toggle_modal(n1, n2, is_open):
-    if n1 or n2:
-        return not is_open
-    return is_open
+# @app.callback(
+#     Output("modal", "is_open"),
+#     [Input("open_modal", "n_clicks"), Input("modal_close", "n_clicks")],
+#     [State("modal", "is_open")],
+# )
+# def toggle_modal(n1, n2, is_open):
+#     if n1 or n2:
+#         return not is_open
+#     return is_open

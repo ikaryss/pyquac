@@ -3,8 +3,10 @@ This file is for creating a graph layout
 """
 
 from dash.dependencies import Input, Output, State, ClientsideFunction
-from dash import dcc, callback, clientside_callback
+from dash.exceptions import PreventUpdate
+from dash import dcc
 import plotly.graph_objects as go
+import numpy as np
 from pyquac.settings import settings
 
 AXIS_SIZE = 13
@@ -202,56 +204,95 @@ def figure_layout(
     return figure
 
 
-@callback(
-    Output("heatmap", "style"),
-    Input("btn_sidebar", "n_clicks"),
-    Input("side_click", "data"),
-)
-def toggle_graph(n, nclick):
-    """function to hide and reveal sidebar
+# @app.callback(
+#     Output("heatmap", "style"),
+#     Input("btn_sidebar", "n_clicks"),
+#     Input("side_click", "data"),
+# )
+# def toggle_graph(n, nclick):
+#     """function to hide and reveal sidebar
 
-    Args:
-        n (int): _description_
-        nclick (int): _description_
+#     Args:
+#         n (int): _description_
+#         nclick (int): _description_
 
-    Returns:
-        dict: style objects
-    """
-    if n:
-        if nclick == "SHOW":
-            graph_style = GRAPH_STYLE
-        else:
-            graph_style = GRAPH_HIDEN
-    else:
-        graph_style = GRAPH_STYLE
+#     Returns:
+#         dict: style objects
+#     """
+#     if n:
+#         if nclick == "SHOW":
+#             graph_style = GRAPH_STYLE
+#         else:
+#             graph_style = GRAPH_HIDEN
+#     else:
+#         graph_style = GRAPH_STYLE
 
-    return graph_style
+#     return graph_style
 
 
-clientside_callback(
-    ClientsideFunction(namespace="clientside", function_name="refresh_graph"),
-    Output("heatmap", "figure"),
-    Input("interval-graph-update", "n_intervals"),
-    Input("x_click", "data"),
-    Input("y_click", "data"),
-    Input("heatmap", "clickData"),
-    Input("modal_close", "n_clicks"),
-    Input("modal_db_close", "n_clicks"),
-    State("x_store", "data"),
-    State("y_store", "data"),
-    State("z_store", "data"),
-    State("heatmap", "figure"),
-    State("y_scatter", "data"),
-    State("yz_scatter", "data"),
-    State("x_scatter", "data"),
-    State("xz_scatter", "data"),
-    State("line-switches", "on"),
-    State("x-title", "value"),
-    State("y-title", "value"),
-    prevent_initial_call=True,
-)
+# app.clientside_callback(
+#     ClientsideFunction(namespace="clientside", function_name="refresh_graph"),
+#     Output("heatmap", "figure"),
+#     Input("interval-graph-update", "n_intervals"),
+#     Input("x_click", "data"),
+#     Input("y_click", "data"),
+#     Input("heatmap", "clickData"),
+#     Input("modal_close", "n_clicks"),
+#     Input("modal_db_close", "n_clicks"),
+#     State("x_store", "data"),
+#     State("y_store", "data"),
+#     State("z_store", "data"),
+#     State("heatmap", "figure"),
+#     State("y_scatter", "data"),
+#     State("yz_scatter", "data"),
+#     State("x_scatter", "data"),
+#     State("xz_scatter", "data"),
+#     State("line-switches", "on"),
+#     State("x-title", "value"),
+#     State("y-title", "value"),
+#     prevent_initial_call=True,
+# )
 
-# clientside_callback(
+
+# @app.callback(
+#     Output("x_scatter", "data"),
+#     Output("y_scatter", "data"),
+#     Output("xz_scatter", "data"),
+#     Output("yz_scatter", "data"),
+#     Output("x_click", "data"),
+#     Output("y_click", "data"),
+#     Input("heatmap", "clickData"),
+#     State("x_raw", "data"),
+#     State("y_raw", "data"),
+#     State("z_raw", "data"),
+# )
+# def update_click_data(click, x_raw, y_raw, z_raw):
+#     if (click is None) or (click["points"][0]["curveNumber"] != 0):
+#         raise PreventUpdate
+
+#     data_click = click["points"][0]
+#     x_click = data_click["x"]
+#     y_click = data_click["y"]
+
+#     x_mask = np.equal(np.array(x_raw), np.array(x_click))
+#     y_mask = np.equal(np.array(y_raw), np.array(y_click))
+#     x_scatter = np.array(x_raw)[y_mask]
+#     y_scatter = np.array(y_raw)[x_mask]
+
+#     xz_scatter = np.array(z_raw)[y_mask]
+#     yz_scatter = np.array(z_raw)[x_mask]
+
+#     return (
+#         x_scatter,
+#         y_scatter,
+#         xz_scatter,
+#         yz_scatter,
+#         x_click,
+#         y_click,
+#     )
+
+
+# app.clientside_callback(
 #     """
 #     function(i) {
 #         const triggered_id = dash_clientside.callback_context.triggered.map(t => t.prop_id)[0];
