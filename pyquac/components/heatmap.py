@@ -68,6 +68,23 @@ def define_figure(
         go.Scatter(x=None, y=None, mode="lines", yaxis="y2", name="horizontal")
     )
 
+    fig.add_trace(
+        go.Scatter(
+            x=None,
+            y=None,
+            mode="lines",
+            # yaxis="y2",
+            name="fit",
+            line_color="#000000",
+            line_width=3,
+            visible=True,
+        )
+    )
+
+    # fig.update_layout(
+    #     yaxis={"range": [min(y), max(y)], "autorange"}, xaxis={"range": [min(x), max(x)]}
+    # )
+
     fig.add_vline(
         x=None,
         visible=False,
@@ -100,14 +117,30 @@ def define_figure(
     )
 
     fig.update_layout(
+        yaxis2=dict(title="Mag, dB", side="left"),
+        xaxis2=dict(title="Mag, dB", side="right"),
+    )
+
+    fig.update_layout(
         autosize=False,
-        xaxis=dict(zeroline=False, domain=[0, 0.72], showgrid=True),
-        yaxis=dict(zeroline=False, domain=[0, 0.72], showgrid=True),
-        xaxis2=dict(zeroline=False, domain=[0.76, 1], showgrid=True, visible=True),
-        yaxis2=dict(zeroline=False, domain=[0.76, 1], showgrid=True),
-        bargap=0,
+        xaxis=dict(zeroline=False, domain=[0, 0.72], showgrid=True, tickangle=0),
+        yaxis=dict(zeroline=False, domain=[0, 0.72], showgrid=True, tickangle=0),
+        xaxis2=dict(
+            zeroline=True,
+            domain=[0.76, 1],
+            showgrid=True,
+            visible=True,
+            tickangle=0,
+        ),
+        yaxis2=dict(zeroline=False, domain=[0.76, 1], showgrid=True, tickangle=0),
+        bargap=1,
         hovermode="closest",
     )
+
+    fig.update_xaxes(
+        showline=True, linewidth=2, linecolor="black", mirror=False
+    )  ## Mirror True for box
+    # fig.update_yaxes(showline=True, linewidth=2, linecolor="black", mirror=True)
 
     fig.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
     fig.update_traces(showlegend=False)

@@ -37,6 +37,7 @@ LOGO = html.A(
         className="g-0",
     ),
     href=settings.app_link,
+    target="_blank",
     style={"textDecoration": "none", "margin-left": "1rem"},
 )
 

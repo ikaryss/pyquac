@@ -1,7 +1,8 @@
 # notes
 """
 This file is for housing the main dash application.
-This is where we define the various css items to fetch as well as the layout of our application.
+This is where we define the various css items to fetch as well as the layout of our application.  
+some tips https://budavariam.github.io/posts/2021/04/05/plotly-dash-development-tips/
 """
 
 from dash import dcc, html, ctx
@@ -29,12 +30,13 @@ from pyquac.components.sidebar import (
     SIDEBAR_HIDEN,
 )
 from pyquac.components.modal import modal
+from pyquac.components.fit_block import fit_block, FIT_STYLE, FIT_HIDEN
 from pyquac.components.modal_db import modal_db
 
 from pyquac.components.property_nav import (
     property_nav,
     _get_result_,
-    _get_raw_result_,
+    # _get_raw_result_,
     _file_name_,
     _save_path_,
     PROPERTY_NAV_STYLE,
@@ -60,6 +62,7 @@ STORE = {
     "yz_scatter": None,
     "x_click": None,
     "y_click": None,
+    "z_click": None,
     "x_label": settings.init_x_label,
     "y_label": settings.init_y_label,
 }
@@ -125,6 +128,12 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
                 dcc.Store(id="z_store", data=data.njit_result, storage_type="memory"),
                 dcc.Store(id="x_store", data=data.x_1d, storage_type="memory"),
                 dcc.Store(id="y_store", data=data.y_1d, storage_type="memory"),
+                dcc.Store(id="x_click_list", data=[], storage_type="memory"),
+                dcc.Store(id="y_click_list", data=[], storage_type="memory"),
+                dcc.Store(id="z_click_list", data=[], storage_type="memory"),
+                dcc.Store(id="x_fit", data=[], storage_type="memory"),
+                dcc.Store(id="y_fit", data=[], storage_type="memory"),
+                dcc.Store(id="z_fit", data=[], storage_type="memory"),
                 dcc.Store(
                     id="save_attributes",
                     data=dict(
@@ -181,7 +190,14 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
                                         ),
                                     ]
                                 ),
-                            ]
+                            ],
+                            # width=6,
+                        ),
+                        dbc.Col(
+                            children=[
+                                fit_block,
+                            ],
+                            # width=3,
                         ),
                     ]
                 ),
@@ -201,9 +217,11 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
         # Input("tbl", "active_cell")
         Input("current_data", "data"),
         Input("tbl", "selected_rows"),
+        # Input("temp", "data"),
     )
     def update_fig_data(i, active_cell, row):
         button_clicked = ctx.triggered_id
+        # print(temp)
         if button_clicked == "tbl":
             current_data = data_zoo[active_cell]
             return (
@@ -269,6 +287,10 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
         Input("heatmap", "clickData"),
         Input("modal_close", "n_clicks"),
         Input("modal_db_close", "n_clicks"),
+        Input("fit", "n_clicks"),
+        Input("x_fit", "data"),
+        Input("y_fit", "data"),
+        Input("fit_curve_show", "on"),
         State("x_store", "data"),
         State("y_store", "data"),
         State("z_store", "data"),
@@ -290,18 +312,20 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
         Output("yz_scatter", "data"),
         Output("x_click", "data"),
         Output("y_click", "data"),
+        Output("z_click", "data"),
         Input("heatmap", "clickData"),
         State("x_raw", "data"),
         State("y_raw", "data"),
         State("z_raw", "data"),
     )
     def update_click_data(click, x_raw, y_raw, z_raw):
-        if (click is None) or (click["points"][0]["curveNumber"] != 0):
+        if (click is None) or (click["points"][0]["curveNumber"] not in [0, 3]):
             raise PreventUpdate
 
         data_click = click["points"][0]
         x_click = data_click["x"]
         y_click = data_click["y"]
+        z_click = data_click["z"]
 
         x_mask = np.equal(np.array(x_raw), np.array(x_click))
         y_mask = np.equal(np.array(y_raw), np.array(y_click))
@@ -311,14 +335,7 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
         xz_scatter = np.array(z_raw)[y_mask]
         yz_scatter = np.array(z_raw)[x_mask]
 
-        return (
-            x_scatter,
-            y_scatter,
-            xz_scatter,
-            yz_scatter,
-            x_click,
-            y_click,
-        )
+        return (x_scatter, y_scatter, xz_scatter, yz_scatter, x_click, y_click, z_click)
 
     # modal DB
     @app.callback(Output("tbl_out", "children"), Input("tbl", "active_cell"))
@@ -359,6 +376,7 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
         Output("current_data", "data"),
         Output("line-switches", "on"),
         Output("save_attributes", "data"),
+        Output("fit_curve_show", "on"),
         Input("modal_db_close", "n_clicks"),
         Input("database", "data"),
         Input("tbl", "selected_rows"),
@@ -372,7 +390,7 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
                 chip=database["chip"][new_idx],
                 spectroscopy_type=database["type"][new_idx],
             )
-            return new_idx, False, new_save_attributes
+            return new_idx, False, new_save_attributes, False
         else:
             raise PreventUpdate
 
@@ -422,9 +440,11 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
         Input("heatmap", "clickData"),
         Input("x_click", "data"),
         Input("y_click", "data"),
+        Input("current_data", "data"),
         Input("interval-switches", "on"),
         Input("update-interval-value", "value"),
         Input("default-path", "value"),
+        Input("additional-info", "value"),
         State("save_attributes", "data"),
         State("status-alert", "is_open"),
         State("x_store", "data"),
@@ -445,9 +465,11 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
         click,
         x_click,
         y_click,
+        active_cell,
         on,
         new_interval,
         default_path,
+        additional_info,
         save_attributes,
         is_open,
         x_result,
@@ -459,6 +481,7 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
         y_title,
         fig_switch,
     ):
+        additional_info = "" if additional_info is None else additional_info
         button_clicked = ctx.triggered_id
         qubit_id, chip_id, spectroscopy_type = (
             save_attributes["qubit_toggle"],
@@ -469,14 +492,24 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
         path = _save_path_(filename, chip_id, default_path, spectroscopy_type)
 
         if button_clicked == "csv":
-            _get_result_(x=x_result, y=y_result, z=z_result).to_csv(f"{path}.csv")
-            return f"current data saved to {path}.csv", True
+            _get_result_(x=x_result, y=y_result, z=z_result).to_csv(f"{path}_{additional_info}.csv")
+            return f"current data saved to {path}_{additional_info}.csv", True
 
         elif button_clicked == "raw csv":
-            _get_raw_result_(_get_result_(x=x_result, y=y_result, z=z_result)).to_csv(
-                f"{path}_stacked.csv"
+            # _get_raw_result_(_get_result_(x=x_result, y=y_result, z=z_result)).to_csv(
+            #     f"{path}_stacked.csv"
+            # )
+            if hasattr(data, "dump_data") and callable(getattr(data, "dump_data")):
+                if active_cell is None:
+                    data.dump_data(f"{path}_{additional_info}.pickle")
+                else:
+                    current_data = data_zoo[active_cell]
+                    current_data.dump_data(f"{path}_{additional_info}.pickle")
+
+                return f"current data saved to {path}_{additional_info}.pickle", True
+            print(
+                f"there is no __class__.dump_data() method in {data.__class__.__name__}"
             )
-            return f"current data saved to {path}_stacked.csv", True
 
         elif button_clicked == "pdf":
             if fig_switch is True:
@@ -487,10 +520,10 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
                     x_axis_title=x_title,
                     y_axis_title=y_title,
                     cmap=cmap,
-                ).write_image(f"{path}.pdf")
+                ).write_image(f"{path}_{additional_info}.pdf")
             else:
-                go.Figure(fig).write_image(f"{path}.pdf")
-            return f"current data saved to {path}.pdf", True
+                go.Figure(fig).write_image(f"{path}_{additional_info}.pdf")
+            return f"current data saved to {path}_{additional_info}.pdf", True
 
         elif button_clicked == "svg":
             if fig_switch is True:
@@ -501,10 +534,10 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
                     x_axis_title=x_title,
                     y_axis_title=y_title,
                     cmap=cmap,
-                ).write_image(f"{path}.svg")
+                ).write_image(f"{path}_{additional_info}.svg")
             else:
-                go.Figure(fig).write_image(f"{path}.svg")
-            return f"current data saved to {path}.svg", True
+                go.Figure(fig).write_image(f"{path}_{additional_info}.svg")
+            return f"current data saved to {path}_{additional_info}.svg", True
 
         elif button_clicked == "html":
             if fig_switch is True:
@@ -515,10 +548,10 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
                     x_axis_title=x_title,
                     y_axis_title=y_title,
                     cmap=cmap,
-                ).write_html(f"{path}.html")
+                ).write_html(f"{path}_{additional_info}.html")
             else:
-                go.Figure(fig).write_html(f"{path}.html")
-            return f"current data saved to {path}.html", True
+                go.Figure(fig).write_html(f"{path}_{additional_info}.html")
+            return f"current data saved to {path}_{additional_info}.html", True
 
         elif button_clicked == "heatmap":
             return f"clicked on x: {x_click}\ty: {y_click}", True
@@ -640,6 +673,150 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
         else:
             new_xy_state = False
         return new_xy_state
+
+    # Fit block
+    @app.callback(
+        Output("fit_block", "style"),
+        Input("btn_sidebar", "n_clicks"),
+        Input("side_click", "data"),
+    )
+    def toggle_fit_block(n, nclick):
+        """function to hide and reveal sidebar
+
+        Args:
+            n (int): _description_
+            nclick (int): _description_
+
+        Returns:
+            dict: style objects
+        """
+        if n:
+            if nclick == "SHOW":
+                block_style = FIT_STYLE
+            else:
+                block_style = FIT_HIDEN
+        else:
+            block_style = FIT_STYLE
+
+        return block_style
+
+    @app.callback(
+        Output("points_selected_output", "children"),
+        Output("x_click_list", "data"),
+        Output("y_click_list", "data"),
+        Input("x_selection", "on"),
+        Input("heatmap", "clickData"),
+        Input("x_click", "data"),
+        Input("y_click", "data"),
+        Input("z_click", "data"),
+        Input("x_click_list", "data"),
+        Input("y_click_list", "data"),
+        Input("z_click_list", "data"),
+        Input("clear_selection", "n_clicks"),
+    )
+    def memorize_selection(
+        x_selection,
+        click,
+        x_click,
+        y_click,
+        z_click,
+        x_click_list,
+        y_click_list,
+        z_click_list,
+        clear_sel_btn,
+    ):
+        element_clicked = ctx.triggered_id
+        if x_selection & (element_clicked == "heatmap"):
+            x_click_list.append(x_click)
+            y_click_list.append(y_click)
+            z_click_list.append(z_click)
+            # print(x_click_list)
+            return (
+                f"Points selected: x: {x_click_list}",
+                x_click_list,
+                y_click_list,
+            )
+        else:
+            if clear_sel_btn:
+                return "Points selected: ", [], []
+            else:
+                raise PreventUpdate
+
+    @app.callback(
+        Output("x_fit", "data"),
+        Output("y_fit", "data"),
+        Input("x_click_list", "data"),
+        Input("y_click_list", "data"),
+        # Input("thres", "value"),
+        # Input("min_dist", "value"),
+        # Input("n_last", "value"),
+        Input("deg", "value"),
+        Input("res_bnd", "value"),
+        Input("manual_fit", "on"),
+        Input("current_data", "data"),
+        Input("fit", "n_clicks"),
+    )
+    def fit_curve(x_list, y_list, deg, res_bnd, manual_fit, active_cell, fit):
+        y_key = y_list if manual_fit is True else None
+        element_clicked = ctx.triggered_id
+
+        if element_clicked == "fit":
+            if active_cell is None:
+
+                approx = data.approximate(
+                    poly_nop=len(data.x_list),
+                    x_key=x_list,
+                    y_key=y_key,
+                    deg=deg,
+                    resolving_zone=res_bnd,
+                    # thres=thres,
+                    # min_dist=min_dist,
+                    # n_last=n_last,
+                    print_info=False,
+                )
+                # print("goooo")
+                x_fit = data.x_list
+                y_fit = approx["poly_line"]["y"]
+                return x_fit, y_fit
+            else:
+                current_data = data_zoo[active_cell]
+                approx = current_data.approximate(
+                    poly_nop=len(data.x_list),
+                    x_key=x_list,
+                    y_key=y_key,
+                    deg=deg,
+                    # thres=thres,
+                    # min_dist=min_dist,
+                    # n_last=n_last,
+                    print_info=False,
+                )
+                x_fit = approx["poly_line"]["x"]
+                y_fit = approx["poly_line"]["y"]
+                return x_fit, y_fit
+        else:
+            raise PreventUpdate
+
+    # @app.callback(
+    #     Output("collapse", "is_open"),
+    #     [Input("collapse-button", "n_clicks")],
+    #     [State("collapse", "is_open")],
+    # )
+    # def toggle_collapse(n, is_open):
+    #     if n:
+    #         return not is_open
+    #     return is_open
+
+    app.clientside_callback(
+        """
+    function(i) {
+        const triggered_id = i["data"][3];
+        return triggered_id;
+    }
+    """,
+        Output("temp", "data"),
+        Input("heatmap", "figure"),
+        prevent_initial_call=True,
+    )
 
     return app
 

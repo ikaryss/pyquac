@@ -119,7 +119,7 @@ sidebar = html.Div(
                         [
                             dbc.Button("csv", id="csv", title="save current CSV"),
                             dbc.Button(
-                                "stack csv",
+                                "stack pickle",
                                 id="raw csv",
                                 title="save current stacked CSV",
                             ),
@@ -131,6 +131,17 @@ sidebar = html.Div(
                         # className="my-3",
                         className="mt-2",
                     )
+                ),
+                dbc.NavItem(
+                    dbc.Input(
+                        id="additional-info",
+                        type="text",
+                        placeholder="Additional save info",
+                        disabled=False,
+                        html_size=16,
+                        size="sm",
+                    ),
+                    # style={"margin-left": "1rem"},
                 ),
                 dbc.NavItem(
                     [

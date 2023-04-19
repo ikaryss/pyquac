@@ -232,6 +232,13 @@ class Spectroscopy:
         "__x_for_approximate_idxs",
         "__approximation_y_keys",
         "__z_container_numba",
+        "poly_x",
+        "poly_y",
+        "poly_coef",
+        "x_key",
+        "y_key",
+        "x_pick",
+        "y_pick",
     ]
 
     def __init__(
@@ -363,6 +370,15 @@ class Spectroscopy:
         self.__len_y = len(self.y_list)
         self.__x_for_approximate_idxs = None
         self.__approximation_y_keys = None
+
+        self.poly_x = []
+        self.poly_y = []
+        self.poly_coef = []
+        self.x_key = []
+        self.y_key = []
+
+        self.x_pick = []
+        self.y_pick = []
 
     def __getitem__(self, item):
         return self.raw_array[item]
@@ -620,8 +636,8 @@ class Spectroscopy:
 
         for i in range(len(self.x_raw)):
             self.__z_2d[
-                np.rint((self.__y_container[i] - self.y_min) / self.y_step),
-                np.rint((self.__x_container[i] - self.x_min) / self.x_step),
+                int(np.rint((self.__y_container[i] - self.y_min) / self.y_step)),
+                int(np.rint((self.__x_container[i] - self.x_min) / self.x_step)),
             ] = self.__z_container[i]
 
         z_1d = self.__z_2d.ravel(order="F")
@@ -741,8 +757,11 @@ class Spectroscopy:
             deltas = abs(abs(z) - abs(mode_res))
             # calculation of the k indices of largest values
             _, n_last_idxs = SortingTools.k_max_idxs(deltas, n_last)
+            n_last_idxs = np.array(n_last_idxs, dtype=int)
+            n_last_idxs = np.array(np.round(n_last_idxs / 10) * 10, dtype=int)
             # finding peak values using peak utils
             peak_idxs = peakutils.indexes(z, thres=thres, min_dist=min_dist)
+            peak_idxs = np.array(np.round(peak_idxs / 10) * 10, dtype=int)
             # searching for intersecting values
             peak_and_delta = np.where(np.isin(peak_idxs, n_last_idxs))[0]
 
@@ -787,11 +806,13 @@ class Spectroscopy:
         resolving_zone: float = 0.1,
         *,
         x_key: Iterable = None,
+        y_key: Iterable = None,
         thres: float = 0.7,
         min_dist: int = 75,
         n_last: int = 20,
         deg: int = 2,
         fillna: bool = False,
+        print_info: bool = True,
     ):
         """approximating measured data with polyline of chosen degree
         :param poly_nop: number of points in fitted curve
@@ -821,11 +842,17 @@ class Spectroscopy:
             """rows that we are looking for (every x_value)"""
             x_set = np.unique(X["x_value"].values)  # get an array of unique values of x
 
-        tuple_of_max_z_values = self.xyz_peak(
-            x_key=x_set, thres=thres, min_dist=min_dist, n_last=n_last
-        )
-        print("x", tuple_of_max_z_values[0])
-        print("y", tuple_of_max_z_values[1])
+        if y_key is not None:
+            tuple_of_max_z_values = tuple(
+                [x_key, y_key, [0 for _ in range(len(x_key))]]
+            )
+        else:
+            tuple_of_max_z_values = self.xyz_peak(
+                x_key=x_set, thres=thres, min_dist=min_dist, n_last=n_last
+            )
+        if print_info:
+            print("x", tuple_of_max_z_values[0])
+            print("y", tuple_of_max_z_values[1])
 
         # creating poly curve
         poly = np.poly1d(
@@ -846,7 +873,7 @@ class Spectroscopy:
         """masking"""
 
         min_z_sample = X.z_value.mean() if fillna is True else np.nan
-        max_z_sample = tuple_of_max_z_values[2].mean()
+        max_z_sample = np.array(tuple_of_max_z_values[2]).mean()
 
         get_result_df = self.get_result()
         get_result_df.loc[:, "z_value"] = min_z_sample
@@ -907,6 +934,14 @@ class Spectroscopy:
 
         "deleting bad x approximation"
         x_keys = np.delete(self.x_list, self.__x_for_approximate_idxs)
+
+        self.poly_x = poly_x
+        self.poly_y = poly(poly_x)
+        self.poly_coef = poly.c
+        self.x_key = x_keys
+        self.y_key = np.array(y_keys, dtype=object)
+        self.x_pick = x_key
+        self.y_pick = y_key
 
         return dict(
             y_key=np.array(y_keys, dtype=object),
