@@ -66,6 +66,7 @@ STORE = {
     "x_label": settings.init_x_label,
     "y_label": settings.init_y_label,
 }
+
 ########################## App Layout ##########################
 
 
@@ -291,6 +292,7 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
         Input("x_fit", "data"),
         Input("y_fit", "data"),
         Input("fit_curve_show", "on"),
+        Input("line-switches", "on"),
         State("x_store", "data"),
         State("y_store", "data"),
         State("z_store", "data"),
@@ -299,7 +301,6 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
         State("yz_scatter", "data"),
         State("x_scatter", "data"),
         State("xz_scatter", "data"),
-        State("line-switches", "on"),
         State("x-title", "value"),
         State("y-title", "value"),
         prevent_initial_call=True,
@@ -595,10 +596,12 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
         Output("sidebar", "style"),
         Output("page-content", "style"),
         Output("side_click", "data"),
+        Output("x_selection", "on"),
         Input("btn_sidebar", "n_clicks"),
+        State("x_selection", "on"),
         State("side_click", "data"),
     )
-    def toggle_sidebar(n, nclick):
+    def toggle_sidebar(n, x_selection, nclick):
         """function to hide and reveal sidebar
 
         Args:
@@ -613,6 +616,7 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
                 sidebar_style = SIDEBAR_HIDEN
                 content_style = CONTENT_STYLE1
                 cur_nclick = "HIDDEN"
+                x_selection = False
             else:
                 sidebar_style = SIDEBAR_STYLE
                 content_style = CONTENT_STYLE
@@ -622,11 +626,11 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
             content_style = CONTENT_STYLE
             cur_nclick = "SHOW"
 
-        return sidebar_style, content_style, cur_nclick
+        return sidebar_style, content_style, cur_nclick, x_selection
 
     @app.callback(
         Output("interval-graph-update", "max_intervals"),
-        Output("line-switches", "disabled"),
+        # Output("line-switches", "disabled"),
         Input("interval-switches", "on"),
         Input("modal_db", "is_open"),
     )
@@ -647,9 +651,9 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
             else:
                 new_max_interval = 0
                 disabled = True
-            return new_max_interval, disabled
+            return new_max_interval
         else:
-            return 0, switch_state
+            return 0
 
     @app.callback(
         Output("interval-graph-update", "interval"),

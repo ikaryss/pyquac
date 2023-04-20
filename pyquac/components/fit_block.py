@@ -269,7 +269,7 @@ fit_block = html.Div(
                                 dbc.Col(
                                     daq.BooleanSwitch(
                                         id="fit_curve_show",
-                                        on=True,
+                                        on=False,
                                         color="#3459e6",
                                     ),
                                     width=4,

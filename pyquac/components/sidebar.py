@@ -89,7 +89,7 @@ sidebar = html.Div(
                                 dbc.Col(
                                     daq.BooleanSwitch(
                                         id="interval-switches",
-                                        on=True,
+                                        on=False,
                                         color="#3459e6",
                                     ),
                                     width=4,

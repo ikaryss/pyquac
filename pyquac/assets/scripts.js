@@ -11,6 +11,7 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
       x_fit,
       y_fit,
       fit_curve_show,
+      line_switch,
       x,
       y,
       z,
@@ -19,7 +20,6 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
       yz_scatter,
       x_scatter,
       xz_scatter,
-      line_switch,
       x_title,
       y_title,
       
@@ -92,6 +92,8 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
         figure["data"][0]["y"] = y;
         figure["data"][0]["z"] = z;
 
+        figure["data"][3]["visible"] = false;
+
         // figure["layout"]["yaxis"]["range"][0] = Math.min(y);
         // figure["layout"]["yaxis"]["range"][1] = Math.max(y);
         // figure["layout"]["xaxis"]["range"][0] = Math.min(x);
@@ -103,6 +105,11 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
       }
       if (triggered_id === "fit_curve_show.on") {
         figure["data"][3]["visible"] = fit_curve_show;
+      }
+
+      if (triggered_id === "line-switches.on") {
+        figure["layout"]["shapes"][0]["visible"] = line_switch;
+        figure["layout"]["shapes"][1]["visible"] = line_switch;
       }
       return figure;
     },

@@ -77,7 +77,7 @@ def define_figure(
             name="fit",
             line_color="#000000",
             line_width=3,
-            visible=True,
+            visible=False,
         )
     )
 
