@@ -16,8 +16,8 @@ from dash.exceptions import PreventUpdate
 import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
 
-from pyquac.settings import settings
-from pyquac.components.heatmap import define_figure_simple
+from ..settings import settings
+from ..components.heatmap import define_figure_simple
 
 
 def _get_result_(x, y, z):

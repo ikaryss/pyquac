@@ -18,10 +18,10 @@ import pandas as pd
 from datetime import datetime
 
 # from pyquac.maindash import app
-from pyquac.settings import settings
-from pyquac.utils import initial_spectroscopy_in_app
-from pyquac.components.navbar import navbar
-from pyquac.components.sidebar import (
+from .settings import settings
+from .utils import initial_spectroscopy_in_app
+from .components.navbar import navbar
+from .components.sidebar import (
     sidebar,
     content,
     CONTENT_STYLE,
@@ -29,11 +29,11 @@ from pyquac.components.sidebar import (
     CONTENT_STYLE1,
     SIDEBAR_HIDEN,
 )
-from pyquac.components.modal import modal
-from pyquac.components.fit_block import fit_block, FIT_STYLE, FIT_HIDEN
-from pyquac.components.modal_db import modal_db
+from .components.modal import modal
+from .components.fit_block import fit_block, FIT_STYLE, FIT_HIDEN
+from .components.modal_db import modal_db
 
-from pyquac.components.property_nav import (
+from .components.property_nav import (
     property_nav,
     _get_result_,
     # _get_raw_result_,
@@ -42,7 +42,7 @@ from pyquac.components.property_nav import (
     PROPERTY_NAV_STYLE,
     PROPERTY_NAV_HIDEN,
 )
-from pyquac.components.heatmap import (
+from .components.heatmap import (
     figure_layout,
     GRAPH_HIDEN,
     GRAPH_STYLE,
@@ -89,12 +89,12 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
     """
 
     # App Instance
-    THEME = dbc.themes.ZEPHYR
-    CSS = dbc.icons.FONT_AWESOME
-    ICONS = dbc.icons.BOOTSTRAP
+    # THEME = dbc.themes.ZEPHYR
+    # CSS = dbc.icons.FONT_AWESOME
+    # ICONS = dbc.icons.BOOTSTRAP
     load_figure_template("ZEPHYR")
 
-    app = JupyterDash(__name__, external_stylesheets=[THEME, CSS, ICONS])
+    app = JupyterDash(__name__)
     app.title = settings.app_name
 
     # Data configuration block
@@ -320,7 +320,7 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
         State("z_raw", "data"),
     )
     def update_click_data(click, x_raw, y_raw, z_raw):
-        if (click is None) or (click["points"][0]["curveNumber"] not in [0, 3]):
+        if (click is None) or (click["points"][0]["curveNumber"] not in [0,]):
             raise PreventUpdate
 
         data_click = click["points"][0]
@@ -398,8 +398,9 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
     # Modal
     @app.callback(
         Output("modal", "is_open"),
-        [Input("open_modal", "n_clicks"), Input("modal_close", "n_clicks")],
-        [State("modal", "is_open")],
+        Input("open_modal", "n_clicks"), 
+        Input("modal_close", "n_clicks"),
+        State("modal", "is_open"),
     )
     def toggle_modal(n1, n2, is_open):
         if n1 or n2:
@@ -487,7 +488,7 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
         qubit_id, chip_id, spectroscopy_type = (
             save_attributes["qubit_toggle"],
             save_attributes["chip"],
-            save_attributes["spectroscopy_type"],
+            save_attributes["spectroscopy_type"].upper(),
         )
         filename = _file_name_(qubit_id, datetime.now().strftime("_%H-%M-%S"))
         path = _save_path_(filename, chip_id, default_path, spectroscopy_type)
@@ -630,7 +631,6 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
 
     @app.callback(
         Output("interval-graph-update", "max_intervals"),
-        # Output("line-switches", "disabled"),
         Input("interval-switches", "on"),
         Input("modal_db", "is_open"),
     )
@@ -647,10 +647,8 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
         if db_open is False:
             if switch_state is True:
                 new_max_interval = -1
-                disabled = False
             else:
                 new_max_interval = 0
-                disabled = True
             return new_max_interval
         else:
             return 0
@@ -810,17 +808,17 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
     #         return not is_open
     #     return is_open
 
-    app.clientside_callback(
-        """
-    function(i) {
-        const triggered_id = i["data"][3];
-        return triggered_id;
-    }
-    """,
-        Output("temp", "data"),
-        Input("heatmap", "figure"),
-        prevent_initial_call=True,
-    )
+    # app.clientside_callback(
+    #     """
+    # function(i) {
+    #     triggered_id = i["layout"]["yaxis"]["range"];
+    #     return triggered_id;
+    # }
+    # """,
+    #     Output("temp", "data"),
+    #     Input("heatmap", "figure"),
+    #     prevent_initial_call=True,
+    # )
 
     return app
 

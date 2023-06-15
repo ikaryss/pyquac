@@ -4,7 +4,7 @@ from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 import dash_daq as daq
 from dash import dcc
-from pyquac.settings import settings
+from ..settings import settings
 
 FIT_STYLE = {
     "position": "fixed",

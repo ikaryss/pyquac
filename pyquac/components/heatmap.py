@@ -7,7 +7,7 @@ from dash.exceptions import PreventUpdate
 from dash import dcc
 import plotly.graph_objects as go
 import numpy as np
-from pyquac.settings import settings
+from ..settings import settings
 
 AXIS_SIZE = 13
 
@@ -84,6 +84,11 @@ def define_figure(
     # fig.update_layout(
     #     yaxis={"range": [min(y), max(y)], "autorange"}, xaxis={"range": [min(x), max(x)]}
     # )
+    # fig.update_layout(
+    #     yaxis={"range": [min(y), max(y)], "autorange": False}, xaxis={"range": [min(x), max(x)], "autorange": False}
+    # )
+    # fig.update_yaxes(range=[min(y), max(y)])
+    # print(fig["data"])
 
     fig.add_vline(
         x=None,

@@ -7,7 +7,7 @@ basic settings for graph component as well as for saving properties
 from dash.dependencies import Input, Output, State
 from dash import html
 import dash_bootstrap_components as dbc
-from pyquac.settings import settings
+from ..settings import settings
 
 tooltip = html.Div(
     [

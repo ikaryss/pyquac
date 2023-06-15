@@ -957,8 +957,8 @@ class Spectroscopy:
         cleans data after approximation
         """
         i = 0
-        for x in np.array(self.x_list, dtype=np.float32):
-            array2 = np.array(self.__approximation_y_keys[i], dtype=np.float32)
+        for x in self.x_list:
+            array2 = np.array(self.__approximation_y_keys[i])
             mask_arr = ~np.isclose(
                 self.raw_frame["y_value"].values[:, None], array2, atol=0.1
             ).any(axis=1)

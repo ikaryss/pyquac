@@ -70,6 +70,7 @@ class Tts(Spectroscopy):
         cs_mode=False,
         cs_device: str = "GPIB0::12::INSTR",
         delta_res=-1 * 50e3,
+        electric_delay=60e-9
     ):
         """
         Class provides methods for working with live data for Two Tone Spectroscopy
@@ -135,7 +136,7 @@ class Tts(Spectroscopy):
                 + "/offset"
             )
             # open HDAWG ZI
-            _ = self.hdawg.awgModule()
+            # _ = self.hdawg.awgModule()
         else:
             self.cs = K6220(cs_device)
 
@@ -153,9 +154,10 @@ class Tts(Spectroscopy):
         self.LO_res.set_averages(LO_res_set_averages)
         self.LO_res_meas_averages = LO_res_meas_averages
         self.delta_res = delta_res
+        self.electric_delay = electric_delay
 
         self.resonator_fit_data = {}
-        self.resonator_fit_data_without_delta = {}
+        self.resonator_fit_data_scan = {}
 
         pass
 
@@ -198,8 +200,9 @@ class Tts(Spectroscopy):
 
         # measure S21
         freqs = self.LO_res.get_freqpoints()
-        notch = notch_port(freqs, self.LO_res.measure()["S-parameter"])
-        notch.autofit(electric_delay=60e-9)
+        s_param = self.LO_res.measure()["S-parameter"]
+        notch = notch_port(freqs, s_param)
+        notch.autofit(electric_delay=self.electric_delay)
         fit_results = notch.fitresults["fr"]
         result = round(fit_results + self.delta_res)
 
@@ -209,7 +212,7 @@ class Tts(Spectroscopy):
         self.LO_res.set_nop(1)
         self.LO.set_status(1)
 
-        return result, fit_results
+        return result, s_param
 
     def run_measurements(
         self,
@@ -244,27 +247,28 @@ class Tts(Spectroscopy):
         self.LO_res.set_bandwidth(self.base_bandwidth)
         try:
             for i in range(len(self.load)):
-                if (i == 0) or (self.load[i] != self.load[i - 1]):
-                    result, result_without_delta = self.__find_resonator
-                    self.resonator_fit_data[self.load[i]] = result
-                    self.resonator_fit_data_without_delta[
-                        self.load[i]
-                    ] = result_without_delta
-                    self.LO_res.set_center(float(result))
-
-                    if timeout is not None:
-                        timer.sleep(timeout)
-                    else:
-                        pass
-                # measurement averages
-                self.LO_res.set_averages(self.LO_res_meas_averages)
-
                 if not self.cs_mode:
                     self.hdawg.setDouble(
                         self.hdawg_setDouble, self.load[i]
                     )  # Voltage write
                 else:
                     self.cs.write("CURRent {}".format(self.load[i]))  # Current write
+                    
+                if (i == 0) or (self.load[i] != self.load[i - 1]):
+                    if timeout is not None:
+                        timer.sleep(timeout)
+                    else:
+                        pass
+                    result, s_param = self.__find_resonator
+                    self.resonator_fit_data[self.load[i]] = result
+                    self.resonator_fit_data_scan[
+                        self.load[i]
+                    ] = s_param
+                    self.LO_res.set_center(float(result))
+
+                    
+                # measurement averages
+                self.LO_res.set_averages(self.LO_res_meas_averages)
 
                 self.LO.set_frequency(self.frequency[i])  # Frequency write
 
@@ -302,7 +306,7 @@ class Tts(Spectroscopy):
             "LO_res_nop": self.LO_res_set_nop,
             "delta_res": self.delta_res,
             "res_fit": self.resonator_fit_data,
-            "res_raw_fit": self.resonator_fit_data_without_delta,
+            "res_fit_scan": self.resonator_fit_data_scan,
             "res_fr_min": self.fr_min,
             "res_fr_max": self.fr_max,
             "x_flatten": self.x_1d,
@@ -476,7 +480,7 @@ class Sts(Spectroscopy):
                 pass
             else:
                 # drop the last column if interrupt for stable data saving
-                self.drop(x=self.x_raw[-1])
+                self.drop(x=[self.x_raw[-1],])
             pass
 
         # Turn off HDAWG or CS

@@ -8,7 +8,7 @@ from dash import dash_table
 from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 import pandas as pd
-from pyquac.settings import settings
+from ..settings import settings
 
 style_data_conditional = [
     {

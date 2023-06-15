@@ -5,7 +5,7 @@ from typing import Iterable, Union
 import numpy as np
 
 # family class
-from pyquac.datatools import Spectroscopy, timer
+from .datatools import Spectroscopy, timer
 
 
 class Random_spectroscopy(Spectroscopy):

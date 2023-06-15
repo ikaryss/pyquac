@@ -1,7 +1,7 @@
 # notes
 import socket
 import numpy as np
-from pyquac.settings import settings
+from .settings import settings
 
 
 def is_port_in_use(port: int) -> bool:
