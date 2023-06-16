@@ -28,7 +28,6 @@ def spectroscopy_configure(
     ny_points: int = None,
 ):
     if filename is not None:
-
         file = pd.read_csv(filename)
         x_arr = np.unique(file[x_column_name].values)
         y_arr = np.unique(file[y_column_name].values)
@@ -1081,7 +1080,6 @@ class Spectroscopy:
         self.z_raw = list(raw_csv[z_col_name].values)
 
     def __drop_the(self, column: str, value_s: Union[np.float32, int, Iterable]):
-
         decimals = self.__x_step_DP if column == "x_value" else self.__y_step_DP
 
         value_s = (
@@ -1120,7 +1118,6 @@ class Spectroscopy:
         x_values: Union[np.float32, int, Iterable],
         y_values: Union[np.float32, int, Iterable],
     ):
-
         x_decimals, y_decimals = self.__x_step_DP, self.__y_step_DP
 
         # x mask
@@ -1180,7 +1177,6 @@ class Spectroscopy:
     def __config_closest_values(
         self, input_value: Union[np.float32, int, Iterable], base_array: Iterable
     ):
-
         """
         if x list is given then find the nearest values in self.x_list
         :param input_value:
@@ -1208,7 +1204,6 @@ class Spectroscopy:
         array_set_input_in_func: Union[np.float32, int, Iterable],
         column: str = "x_value",
     ):
-
         """configurate arrays from given values"""
 
         if (min_value is not None) and (max_value is not None):

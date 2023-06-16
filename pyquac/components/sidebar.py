@@ -9,7 +9,7 @@ from dash import html
 from dash.exceptions import PreventUpdate
 import dash_bootstrap_components as dbc
 import dash_daq as daq
-from ..settings import settings
+from pyquac.settings import settings
 
 # the style arguments for the sidebar. We use position:fixed and a fixed width
 SIDEBAR_STYLE = {

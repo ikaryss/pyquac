@@ -5,7 +5,7 @@ from typing import Iterable, Union
 import numpy as np
 
 # family class
-from .datatools import Spectroscopy, timer
+from pyquac.datatools import Spectroscopy, timer
 
 
 class Random_spectroscopy(Spectroscopy):
@@ -27,7 +27,6 @@ class Random_spectroscopy(Spectroscopy):
         x_arr=None,
         y_arr=None,
     ):
-
         super().__init__(
             x_min=x_min,
             x_max=x_max,
@@ -53,14 +52,12 @@ class Random_spectroscopy(Spectroscopy):
         y_max=None,
         sleep=0.007,
     ):
-
         self.iter_setup(
             x_key=x_key, y_key=y_key, x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max
         )
         iterations = len(self.load)
         try:
             for i in range(iterations):
-
                 self.write(x=self.load[i], y=self.frequency[i], z=np.random.random())
                 timer.sleep(sleep)
 

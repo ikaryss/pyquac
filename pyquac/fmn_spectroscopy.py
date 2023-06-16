@@ -26,7 +26,7 @@ from resonator_tools import circlefit
 from resonator_tools.circuit import notch_port
 
 # family class
-from .datatools import Spectroscopy, timer, mrange
+from pyquac.datatools import Spectroscopy, timer, mrange
 
 
 def _fit_cos(t, A1, A0, omega, teta):
@@ -70,7 +70,7 @@ class Tts(Spectroscopy):
         cs_mode=False,
         cs_device: str = "GPIB0::12::INSTR",
         delta_res=-1 * 50e3,
-        electric_delay=60e-9
+        electric_delay=60e-9,
     ):
         """
         Class provides methods for working with live data for Two Tone Spectroscopy
@@ -186,7 +186,6 @@ class Tts(Spectroscopy):
 
     @property
     def __find_resonator(self):
-
         self.LO.set_status(0)
 
         # prior bandwidth
@@ -226,7 +225,6 @@ class Tts(Spectroscopy):
         sleep=0.007,
         timeout=None,
     ):
-
         # Turn on HDAWG or CS
         if not self.cs_mode:
             self.hdawg.setInt(
@@ -253,7 +251,7 @@ class Tts(Spectroscopy):
                     )  # Voltage write
                 else:
                     self.cs.write("CURRent {}".format(self.load[i]))  # Current write
-                    
+
                 if (i == 0) or (self.load[i] != self.load[i - 1]):
                     if timeout is not None:
                         timer.sleep(timeout)
@@ -261,12 +259,9 @@ class Tts(Spectroscopy):
                         pass
                     result, s_param = self.__find_resonator
                     self.resonator_fit_data[self.load[i]] = result
-                    self.resonator_fit_data_scan[
-                        self.load[i]
-                    ] = s_param
+                    self.resonator_fit_data_scan[self.load[i]] = s_param
                     self.LO_res.set_center(float(result))
 
-                    
                 # measurement averages
                 self.LO_res.set_averages(self.LO_res_meas_averages)
 
@@ -425,7 +420,6 @@ class Sts(Spectroscopy):
         pass
 
     def run_measurements(self, *, sleep=0.0007):
-
         self.iter_setup(
             x_key=None, y_key=None, x_min=None, x_max=None, y_min=None, y_max=None
         )
@@ -451,7 +445,6 @@ class Sts(Spectroscopy):
         try:
             for i in range(len(self.load)):
                 if (i == 0) or (self.load[i] != self.load[i - 1]):
-
                     if not self.cs_mode:
                         self.hdawg.setDouble(
                             self.hdawg_setDouble, self.load[i]
@@ -480,7 +473,11 @@ class Sts(Spectroscopy):
                 pass
             else:
                 # drop the last column if interrupt for stable data saving
-                self.drop(x=[self.x_raw[-1],])
+                self.drop(
+                    x=[
+                        self.x_raw[-1],
+                    ]
+                )
             pass
 
         # Turn off HDAWG or CS
@@ -746,7 +743,6 @@ class Sts2Q(Spectroscopy):
         self.hdawg.setInt(f"/{self.hdawg_device}/sigouts/{ch_Q}/on", 0)
 
     def run_measurements(self, *, sleep=0.0007):
-
         self.iter_setup(
             x_key=None, y_key=None, x_min=None, x_max=None, y_min=None, y_max=None
         )
@@ -898,7 +894,6 @@ class Sts2Q(Spectroscopy):
     def fit_and_offset(
         self, start, fit_nop: int, freq_for_offset=None, voltage_boundary=[0, 1]
     ):
-
         X = self.raw_frame.copy()
         x_set = np.unique(X["x_value"].values)  # get an array of unique values of x
 
@@ -1018,9 +1013,7 @@ class Sts2QContainer:
         LO_res_set_power: int = -10,
         LO_res_set_averages=1,
     ):
-
         if (x_min is not None) and (x_max is not None):
-
             x_minQ1 = x_min if x_minQ1 is None else x_minQ1
             x_minQ2 = x_min if x_minQ2 is None else x_minQ2
             x_minC = x_min if x_minC is None else x_minC
@@ -1222,7 +1215,6 @@ class Sts2QContainer:
 
     @property
     def final_matrix_old(self):
-
         # First row
         Q1_offset_base = self.Q1.x_offset if self.Q1.finished else None
         a11 = 1 if self.Q1.finished else None
@@ -1273,7 +1265,6 @@ class Sts2QContainer:
 
     @property
     def final_matrix(self):
-
         # First row
         last_point_Q1 = self.Q1.x_list[-1] if self.Q1.finished else None
         a11 = 1 if self.Q1.finished else None
@@ -1574,7 +1565,6 @@ class Tts2Q(Spectroscopy):
         sleep=0.007,
         timeout=None,
     ):
-
         self.iter_setup(
             x_key=x_key, y_key=y_key, x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max
         )
@@ -1720,7 +1710,6 @@ class Tts2Q(Spectroscopy):
         sleep=0.007,
         timeout=None,
     ):
-
         self.iter_setup(
             x_key=x_key, y_key=y_key, x_min=x_min, x_max=x_max, y_min=y_min, y_max=y_max
         )
@@ -1854,7 +1843,6 @@ class Tts2Q(Spectroscopy):
 
     @property
     def __find_resonator(self):
-
         self.LO.set_status(0)
 
         # prior bandwidth
@@ -2057,7 +2045,6 @@ class Tts_4Q(Spectroscopy):
 
     @property
     def __find_resonator(self):
-
         self.LO.set_status(0)
 
         # prior bandwidth
@@ -2095,7 +2082,6 @@ class Tts_4Q(Spectroscopy):
         sleep=0.007,
         timeout=None,
     ):
-
         # Turn on HDAWG or CS
         if not self.cs_mode:
             self.hdawg_2.setInt(

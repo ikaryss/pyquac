@@ -7,7 +7,7 @@ from dash.exceptions import PreventUpdate
 from dash import dcc
 import plotly.graph_objects as go
 import numpy as np
-from ..settings import settings
+from pyquac.settings import settings
 
 AXIS_SIZE = 13
 

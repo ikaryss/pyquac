@@ -16,8 +16,8 @@ from dash.exceptions import PreventUpdate
 import plotly.graph_objects as go
 import dash_bootstrap_components as dbc
 
-from ..settings import settings
-from ..components.heatmap import define_figure_simple
+from pyquac.settings import settings
+from pyquac.components.heatmap import define_figure_simple
 
 
 def _get_result_(x, y, z):
@@ -52,7 +52,6 @@ def _save_path_(filename: str, chip_id: str, default_path: str, spectroscopy_typ
     dir_tts = os.path.join(dir_date, spectroscopy)
 
     if os.path.exists(parent_dir):
-
         # Checking qubit dir existance
         if not os.path.exists(dir_qubit):
             os.mkdir(dir_qubit)

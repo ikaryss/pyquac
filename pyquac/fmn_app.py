@@ -18,10 +18,10 @@ import pandas as pd
 from datetime import datetime
 
 # from pyquac.maindash import app
-from .settings import settings
-from .utils import initial_spectroscopy_in_app
-from .components.navbar import navbar
-from .components.sidebar import (
+from pyquac.settings import settings
+from pyquac.utils import initial_spectroscopy_in_app
+from pyquac.components.navbar import navbar
+from pyquac.components.sidebar import (
     sidebar,
     content,
     CONTENT_STYLE,
@@ -29,20 +29,19 @@ from .components.sidebar import (
     CONTENT_STYLE1,
     SIDEBAR_HIDEN,
 )
-from .components.modal import modal
-from .components.fit_block import fit_block, FIT_STYLE, FIT_HIDEN
-from .components.modal_db import modal_db
+from pyquac.components.modal import modal
+from pyquac.components.fit_block import fit_block, FIT_STYLE, FIT_HIDEN
+from pyquac.components.modal_db import modal_db
 
-from .components.property_nav import (
+from pyquac.components.property_nav import (
     property_nav,
     _get_result_,
-    # _get_raw_result_,
     _file_name_,
     _save_path_,
     PROPERTY_NAV_STYLE,
     PROPERTY_NAV_HIDEN,
 )
-from .components.heatmap import (
+from pyquac.components.heatmap import (
     figure_layout,
     GRAPH_HIDEN,
     GRAPH_STYLE,
@@ -89,9 +88,6 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
     """
 
     # App Instance
-    # THEME = dbc.themes.ZEPHYR
-    # CSS = dbc.icons.FONT_AWESOME
-    # ICONS = dbc.icons.BOOTSTRAP
     load_figure_template("ZEPHYR")
 
     app = JupyterDash(__name__)
@@ -320,7 +316,12 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
         State("z_raw", "data"),
     )
     def update_click_data(click, x_raw, y_raw, z_raw):
-        if (click is None) or (click["points"][0]["curveNumber"] not in [0,]):
+        if (click is None) or (
+            click["points"][0]["curveNumber"]
+            not in [
+                0,
+            ]
+        ):
             raise PreventUpdate
 
         data_click = click["points"][0]
@@ -331,9 +332,14 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
         x_mask = np.equal(np.array(x_raw), np.array(x_click))
         y_mask = np.equal(np.array(y_raw), np.array(y_click))
         x_scatter = np.array(x_raw)[y_mask]
+
+        # sort x and z array to prevent drop plot collapse
+        x_sort_mask = np.argsort(x_scatter)
+        x_scatter = x_scatter[x_sort_mask]
+
         y_scatter = np.array(y_raw)[x_mask]
 
-        xz_scatter = np.array(z_raw)[y_mask]
+        xz_scatter = np.array(z_raw)[y_mask][x_sort_mask]
         yz_scatter = np.array(z_raw)[x_mask]
 
         return (x_scatter, y_scatter, xz_scatter, yz_scatter, x_click, y_click, z_click)
@@ -398,7 +404,7 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
     # Modal
     @app.callback(
         Output("modal", "is_open"),
-        Input("open_modal", "n_clicks"), 
+        Input("open_modal", "n_clicks"),
         Input("modal_close", "n_clicks"),
         State("modal", "is_open"),
     )
@@ -494,7 +500,9 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
         path = _save_path_(filename, chip_id, default_path, spectroscopy_type)
 
         if button_clicked == "csv":
-            _get_result_(x=x_result, y=y_result, z=z_result).to_csv(f"{path}_{additional_info}.csv")
+            _get_result_(x=x_result, y=y_result, z=z_result).to_csv(
+                f"{path}_{additional_info}.csv"
+            )
             return f"current data saved to {path}_{additional_info}.csv", True
 
         elif button_clicked == "raw csv":
@@ -658,7 +666,6 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
         Input("update-interval-value", "value"),
     )
     def change_interval_update(new_interval):
-
         if new_interval is not None:
             return new_interval
         else:
@@ -669,7 +676,6 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
         Input("line-switches", "on"),
     )
     def toggle_xy_lines(switch_state):
-
         if switch_state is True:
             new_xy_state = True
         else:
@@ -764,7 +770,6 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
 
         if element_clicked == "fit":
             if active_cell is None:
-
                 approx = data.approximate(
                     poly_nop=len(data.x_list),
                     x_key=x_list,
@@ -776,7 +781,6 @@ def conf_app(spectroscopy, cmap: str = settings.init_cmap):
                     # n_last=n_last,
                     print_info=False,
                 )
-                # print("goooo")
                 x_fit = data.x_list
                 y_fit = approx["poly_line"]["y"]
                 return x_fit, y_fit

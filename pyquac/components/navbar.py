@@ -9,7 +9,7 @@ from dash.dependencies import Input, Output
 from dash import html
 import dash_bootstrap_components as dbc
 
-from ..settings import settings
+from pyquac.settings import settings
 
 APP_LOGO = settings.app_logo
 LOGO_HEIGHT = "42px" if APP_LOGO == settings.app_logo_pyquac else "35px"

@@ -33,12 +33,6 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
       }
       figure = JSON.parse(JSON.stringify(fig));
 
-
-      // figure["layout"]["yaxis"]["range"][0] = Math.min(y);
-      // figure["layout"]["yaxis"]["range"][1] = Math.max(y);
-      // figure["layout"]["xaxis"]["range"][0] = Math.min(x);
-      // figure["layout"]["xaxis"]["range"][1] = Math.max(x);
-
       if (x_click === undefined) {
         figure["layout"]["shapes"][0]["visible"] = false;
         figure["layout"]["shapes"][1]["visible"] = false;
@@ -69,10 +63,6 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
         figure["layout"]["yaxis"]["autorange"] = false;
         figure["layout"]["yaxis"]["range"] = [Math.min(...y), Math.max(...y)];
 
-        // figure["layout"]["yaxis"]["range"][0] = Math.min(y);
-        // figure["layout"]["yaxis"]["range"][1] = Math.max(y);
-        // figure["layout"]["xaxis"]["range"][0] = Math.min(x);
-        // figure["layout"]["xaxis"]["range"][1] = Math.max(x);
       }
       if (triggered_id === "modal_close.n_clicks") {
         figure["layout"]["xaxis"]["title"]["text"] = x_title;
@@ -103,14 +93,6 @@ window.dash_clientside = Object.assign({}, window.dash_clientside, {
         figure["layout"]["yaxis"]["autorange"] = false;
         figure["layout"]["yaxis"]["range"] = [Math.min(...y), Math.max(...y)];
 
-        // figure["layout"]["yaxis"]["range"] = [ Math.min(y), Math.max(y)];
-        // figure["layout"]["xaxis"]["range"] = [ Math.min(x), Math.max(x)];
-        // figure["layout"]["yaxis"]["autorange"] = False;
-
-        // figure["layout"]["yaxis"]["range"][0] = Math.min(y);
-        // figure["layout"]["yaxis"]["range"][1] = Math.max(y);
-        // figure["layout"]["xaxis"]["range"][0] = Math.min(x);
-        // figure["layout"]["xaxis"]["range"][1] = Math.max(x);
       }
       if (triggered_id === "fit.n_clicks") {
         figure["data"][3]["x"] = x_fit;
