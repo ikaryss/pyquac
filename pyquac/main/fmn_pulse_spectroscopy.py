@@ -2,7 +2,9 @@
 
 # USEFUL LINKS
 # 1. ПЕРВОНАЧАЛЬНАЯ НАСТРОЙКА UHFQA https://docs.zhinst.com/zhinst-toolkit/en/latest/examples/uhfqa_result_unit.html
-# 2.
+# 2. PULSED RESONATOR SPECTROSCOPY https://docs.zhinst.com/shfqc_user_manual/tutorials/tutorial_pulsed_spectroscopy.html
+# 3. MULTIPLEXED QUBIT READOUT https://docs.zhinst.com/shfqa_user_manual/tutorial_qubit_readout.html
+
 from typing import Iterable
 import numpy as np
 from pyquac.datatools import Spectroscopy, timer
