@@ -52,6 +52,8 @@
 While performing qubit calibration experiments - it is necessary to regularly fill out the heatmap graph, as well as fit the curves we can extract from these graphs. Sometimes such measurements can last for hours and if we do not see the result of the measurements immediately, there is a high probability of missing errors related to incorrect configuration of the devices and the measurements will have to be started again.  
 We wrote a little [library](pyquac/datatools.py) that allows you to operate with measurements from devices in real time, approximate the curves obtained from such heatmaps, as well as set the corridor of values on the X and Y axis, which we would like to measure so that we do not have to capture the entire heatmap.  
 
+<img src="docs/images/dash_example2.png" title="single tone spectroscopy example" width="90%">    
+
 We also wrote a web application using the Plotly Dash framework that allows us to visualize the process of building a heatmap in real time. So that the application can handle even big datasets with ease - it uses the just-in-time compiler numba. *Note that the newest version of the app is still under development*.
 > **Live heatmap graph data processing provided for FMN laboratory.**  
 > This work is a part of metrology of quantum control and measurement in superconducting
